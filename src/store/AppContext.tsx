@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PaymentRequest, AuditLog, User, Role } from '../types';
 import { v4 as uuidv4 } from 'uuid';

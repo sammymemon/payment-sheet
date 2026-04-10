@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { PaymentRequest } from '../types';

@@ -1,17 +1,13 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+'use client';
 
-import React from 'react';
-import { AppProvider, useApp } from './store/AppContext';
-import { Layout } from './components/Layout';
-import { PurchaseView } from './components/PurchaseView';
-import { AccountsView } from './components/AccountsView';
-import { ComplianceView } from './components/ComplianceView';
-import { PaymentsView } from './components/PaymentsView';
-import { DashboardView } from './components/DashboardView';
-import { RegisterView } from './components/RegisterView';
+import { AppProvider, useApp } from '@/src/store/AppContext';
+import { Layout } from '@/src/components/Layout';
+import { PurchaseView } from '@/src/components/PurchaseView';
+import { AccountsView } from '@/src/components/AccountsView';
+import { ComplianceView } from '@/src/components/ComplianceView';
+import { PaymentsView } from '@/src/components/PaymentsView';
+import { DashboardView } from '@/src/components/DashboardView';
+import { RegisterView } from '@/src/components/RegisterView';
 
 const AppContent = () => {
   const { currentUser } = useApp();
@@ -40,11 +36,10 @@ const AppContent = () => {
   );
 };
 
-export default function App() {
+export default function Home() {
   return (
     <AppProvider>
       <AppContent />
     </AppProvider>
   );
 }
-

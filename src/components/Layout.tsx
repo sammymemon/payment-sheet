@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useApp, defaultUsers } from '../store/AppContext';
 import { cn } from '../lib/utils';
