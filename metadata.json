@@ -1,0 +1,5 @@
+{
+  "name": "DevX Payment Sheet",
+  "description": "A workflow-based payment sheet application for DevX with Purchase, Accounts, Compliance, and Payment stages.",
+  "requestFramePermissions": []
+}
