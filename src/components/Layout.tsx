@@ -49,11 +49,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             transition={{ duration: 0.2 }}
             className="flex flex-col z-30 shrink-0 h-full overflow-hidden absolute md:relative border-r border-[#E8E7E2] bg-[#F8F7F4]"
           >
-            <div className="h-16 flex items-center px-4 shrink-0">
-              <div className="w-8 h-8 rounded bg-[#D9795A] flex items-center justify-center mr-2 text-white font-serif italic font-bold">
-                C
+            <div className="h-20 flex items-center px-4 shrink-0 mt-2 mb-2">
+              <div className="w-8 h-8 rounded bg-[#D9795A] flex items-center justify-center mr-3 text-white font-serif italic text-lg font-bold shrink-0">
+                P
               </div>
-              <h1 className="text-base font-semibold tracking-tight text-[#2A2A26] font-serif">Claude Core</h1>
+              <h1 className="text-[13px] font-semibold tracking-tight text-[#2A2A26] font-serif leading-snug">Project Payment <br/> Sheet Master</h1>
             </div>
             
             <div className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
