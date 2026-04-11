@@ -134,8 +134,12 @@ export const PurchaseView: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: pastedImage }),
       });
-      if (!response.ok) throw new Error('Extraction failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
       const data = await response.json();
+      
       if (data.error) throw new Error(data.error);
       
       if (Array.isArray(data)) {
