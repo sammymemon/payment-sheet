@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { RequestList } from './RequestList';
 import { PaymentRequest, CompanyName } from '../types';
-import { AlertCircle, Plus, Trash2, Edit2, Check, X } from 'lucide-react';
+import { AlertCircle, Plus, Trash2, Edit2, Check, X, Image as ImageIcon, Upload, Loader2, ClipboardPaste } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
 export const PurchaseView: React.FC = () => {
   const { requests, addRequests, updateRequest } = useApp();
   const [isCreating, setIsCreating] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [pastedImage, setPastedImage] = useState<string | null>(null);
   
   const [companyName, setCompanyName] = useState<CompanyName | ''>('');
   const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -97,6 +99,63 @@ export const PurchaseView: React.FC = () => {
     setEditForm({});
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPastedImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const item = e.clipboardData.items[0];
+    if (item?.type.includes('image')) {
+      const blob = item.getAsFile();
+      if (blob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPastedImage(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      }
+    }
+  };
+
+  const extractData = async () => {
+    if (!pastedImage) return;
+    
+    setIsExtracting(true);
+    try {
+      const response = await fetch('/api/extract-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: pastedImage }),
+      });
+      
+      if (!response.ok) throw new Error('Extraction failed');
+      
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        // Map data to the internal row structure
+        const newRows = data.map(item => ({
+          ...initialRow,
+          ...item
+        }));
+        setRows(newRows);
+        setPastedImage(null); // Clear image after successful extraction
+        alert(`Successfully extracted ${data.length} rows!`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Failed to extract data. Please ensure GEMINI_API_KEY is set or try a clearer image.');
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -127,6 +186,59 @@ export const PurchaseView: React.FC = () => {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-medium text-gray-900">Create Payment Requests</h3>
+            <div className="flex space-x-2">
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center">
+                <ClipboardPaste className="h-3 w-3 mr-1" />
+                Tip: Paste image (Ctrl+V) anywhere to auto-fill
+              </span>
+            </div>
+          </div>
+
+          <div 
+            onPaste={handlePaste}
+            className="mb-8 p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100/50 hover:border-blue-300 transition-all group relative"
+          >
+            {pastedImage ? (
+              <div className="flex flex-col items-center space-y-4">
+                <img src={pastedImage} alt="Pasted" className="max-h-48 rounded shadow-sm border border-gray-200" />
+                <div className="flex space-x-3">
+                  <button 
+                    type="button"
+                    onClick={extractData}
+                    disabled={isExtracting}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center shadow-md disabled:opacity-50"
+                  >
+                    {isExtracting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4 mr-2" />
+                    )}
+                    {isExtracting ? 'Extracting Data...' : 'Auto-Fill from Image'}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setPastedImage(null)}
+                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 mb-3 group-hover:scale-110 transition-transform">
+                  <ImageIcon className="h-6 w-6 text-gray-400 group-hover:text-blue-500" />
+                </div>
+                <p className="text-sm font-medium text-gray-700">Paste an image or click to upload</p>
+                <p className="text-xs text-gray-500 mt-1">Excel screenshot, Payment sheet photo, etc.</p>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+            )}
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
