@@ -12,7 +12,7 @@ import { AdminView } from '@/src/components/AdminView';
 import { useEffect } from 'react';
 
 const AppContent = () => {
-  const { currentUser, setCurrentUser, users } = useApp();
+  const { currentUser, setCurrentUser, users, activeTab, setActiveTab } = useApp();
 
   // Handle invite links / direct role access via URL
   useEffect(() => {
@@ -23,14 +23,15 @@ const AppContent = () => {
       const user = users.find(u => u.role === roleParam);
       if (user) {
         setCurrentUser(user);
+        setActiveTab(roleParam as any);
         // Clear param without reload
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
-  }, [users, setCurrentUser]);
+  }, [users, setCurrentUser, setActiveTab]);
 
   const renderView = () => {
-    switch (currentUser.role) {
+    switch (activeTab) {
       case 'Purchase':
         return <PurchaseView />;
       case 'Accounts':
@@ -39,10 +40,11 @@ const AppContent = () => {
         return <ComplianceView />;
       case 'Payments':
         return <PaymentsView />;
-      case 'Register':
+      case 'Register' as any:
         return <RegisterView />;
       case 'Admin':
         return <AdminView />;
+      case 'Dashboard':
       default:
         return <DashboardView />;
     }

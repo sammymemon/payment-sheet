@@ -111,15 +111,47 @@ export const PurchaseView: React.FC = () => {
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    const item = e.clipboardData.items[0];
-    if (item?.type.includes('image')) {
-      const blob = item.getAsFile();
+    // 1. Check for Image
+    const imageItem = e.clipboardData.items[0];
+    if (imageItem?.type.includes('image')) {
+      const blob = imageItem.getAsFile();
       if (blob) {
         const reader = new FileReader();
         reader.onloadend = () => {
           setPastedImage(reader.result as string);
         };
         reader.readAsDataURL(blob);
+      }
+      return;
+    }
+
+    // 2. Check for Text (TSV from Excel/Sheets)
+    const textData = e.clipboardData.getData('text/plain');
+    if (textData && textData.includes('\t')) {
+      try {
+        const lines = textData.trim().split('\n');
+        const newRows: Partial<PaymentRequest>[] = lines.map(line => {
+          const cells = line.split('\t');
+          return {
+            ...initialRow,
+            projectName: cells[0] || '',
+            vendorName: cells[1] || '',
+            natureOfWork: cells[2] || '',
+            poNumber: cells[3] || '',
+            paymentType: (cells[4] || 'Partial') as any,
+            poAmount: Number(cells[5]?.replace(/[^0-9.]/g, '')) || 0,
+            alreadyPaidAmount: Number(cells[6]?.replace(/[^0-9.]/g, '')) || 0,
+            needToPayAmount: Number(cells[7]?.replace(/[^0-9.]/g, '')) || 0,
+            needToPay: cells[8]?.toLowerCase().includes('y') || cells[8]?.toLowerCase().includes('true') || false,
+          };
+        });
+        
+        if (newRows.length > 0) {
+          setRows(newRows);
+          alert(`Successfully pasted ${newRows.length} rows from clipboard!`);
+        }
+      } catch (err) {
+        console.error("Paste error", err);
       }
     }
   };
@@ -138,6 +170,8 @@ export const PurchaseView: React.FC = () => {
       if (!response.ok) throw new Error('Extraction failed');
       
       const data = await response.json();
+      if (data.error) throw new Error(data.error);
+      
       if (Array.isArray(data)) {
         // Map data to the internal row structure
         const newRows = data.map(item => ({
@@ -148,9 +182,9 @@ export const PurchaseView: React.FC = () => {
         setPastedImage(null); // Clear image after successful extraction
         alert(`Successfully extracted ${data.length} rows!`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Failed to extract data. Please ensure GEMINI_API_KEY is set or try a clearer image.');
+      alert(error.message || 'Failed to extract data. Please ensure GEMINI_API_KEY is set or try a clearer image.');
     } finally {
       setIsExtracting(false);
     }
@@ -189,15 +223,18 @@ export const PurchaseView: React.FC = () => {
             <div className="flex space-x-2">
               <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center">
                 <ClipboardPaste className="h-3 w-3 mr-1" />
-                Tip: Paste image (Ctrl+V) anywhere to auto-fill
+                Tip: Paste image (Ctrl+V) or Excel rows anywhere
               </span>
             </div>
           </div>
 
           <div 
             onPaste={handlePaste}
-            className="mb-8 p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100/50 hover:border-blue-300 transition-all group relative"
+            className="mb-8 p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100/50 hover:border-blue-300 transition-all group relative overflow-hidden"
           >
+            <div className="absolute top-2 right-2 flex space-x-1">
+              <span className="text-[10px] uppercase font-bold text-gray-400 bg-white px-1.5 py-0.5 rounded border border-gray-200">AI Powered</span>
+            </div>
             {pastedImage ? (
               <div className="flex flex-col items-center space-y-4">
                 <img src={pastedImage} alt="Pasted" className="max-h-48 rounded shadow-sm border border-gray-200" />

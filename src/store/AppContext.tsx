@@ -17,6 +17,8 @@ interface AppContextType {
   addRequests: (requests: Partial<PaymentRequest>[]) => void;
   updateRequest: (id: string, updates: Partial<PaymentRequest>, action: string, remarks?: string) => void;
   getLogsForRequest: (requestId: string) => AuditLog[];
+  activeTab: Role | 'Dashboard' | 'Admin';
+  setActiveTab: (tab: Role | 'Dashboard' | 'Admin') => void;
 }
 
 const defaultUsers: User[] = [
@@ -65,6 +67,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [users, setUsers] = useState<User[]>(defaultUsers);
   const [requests, setRequests] = useState<PaymentRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [activeTab, setActiveTab] = useState<Role | 'Dashboard' | 'Admin'>('Dashboard');
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -73,7 +76,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const savedUsersStr = localStorage.getItem('devx_users');
     
     if (savedUsersStr) {
-      setUsers(JSON.parse(savedUsersStr));
+      const savedUsers: User[] = JSON.parse(savedUsersStr);
+      // Merge: Keep all saved users, but ensure default ones exist
+      const mergedUsers = [...savedUsers];
+      defaultUsers.forEach(defU => {
+        if (!mergedUsers.find(u => u.role === defU.role)) {
+          mergedUsers.push(defU);
+        }
+      });
+      setUsers(mergedUsers);
     }
     
     let loadedRequests: PaymentRequest[] = [];
@@ -264,6 +275,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addRequests,
         updateRequest,
         getLogsForRequest,
+        activeTab,
+        setActiveTab,
       }}
     >
       {children}

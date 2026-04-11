@@ -20,7 +20,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { currentUser, setCurrentUser, users } = useApp();
+  const { currentUser, setCurrentUser, users, activeTab, setActiveTab } = useApp();
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, role: 'Dashboard' },
@@ -46,19 +46,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             if (item.role === 'Dashboard') return true;
             return currentUser.role === item.role;
           }).map((item) => {
-            const isActive = currentUser.role === item.role || (!item.role && currentUser.role === 'Dashboard');
+            const isActive = activeTab === item.role;
             // For simplicity, we just change the current user role to simulate switching views
             // In a real app, this would be route-based, but here we just use the role to filter views
             return (
               <button
                 key={item.name}
                 onClick={() => {
-                  const user = users.find(u => u.role === item.role);
-                  if (user) {
-                    setCurrentUser(user);
+                  if (currentUser.role === 'Admin') {
+                    setActiveTab(item.role as any);
                   } else {
-                    // Fallback if no user exists for this role yet
-                    setCurrentUser({ id: `temp-${item.role}`, name: `Guest ${item.role}`, role: item.role as any });
+                    const user = users.find(u => u.role === item.role);
+                    if (user) {
+                      setCurrentUser(user);
+                    } else {
+                      setCurrentUser({ id: `temp-${item.role}`, name: `Guest ${item.role}`, role: item.role as any });
+                    }
+                    setActiveTab(item.role as any);
                   }
                 }}
                 className={cn(
@@ -90,7 +94,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 justify-between shrink-0">
           <h2 className="text-lg font-medium text-gray-800">
-            {currentUser.role} Workspace
+            {activeTab} Workspace
           </h2>
           <div className="flex items-center space-x-4">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
