@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,16 +8,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROK_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
+      return NextResponse.json({ error: "GROK_API_KEY not configured in environment variables" }, { status: 500 });
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    // Remove the base64 prefix if present
-    const base64Data = image.split(",")[1] || image;
+    // Ensure the image string has the correct Data URL prefix otherwise xAI might reject it.
+    // If it's pure base64 (which happens if it was stripped), prepend the png mimetype.
+    const imageDataUrl = image.startsWith("data:") ? image : `data:image/png;base64,${image}`;
 
     const prompt = `
       Extract data from this payment sheet image. 
@@ -40,17 +37,45 @@ export async function POST(req: NextRequest) {
       - Look closely at column headers like "Project", "Vendor Name", "Work", "PO NO", "PO AMOUNT", "Paid Amount", "Need to Pay".
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: "image/png", // Assuming PNG as most common for screenshot/paste
-        },
+    // Fetch from xAI
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
       },
-    ]);
+      body: JSON.stringify({
+        model: "grok-2-vision-1212", 
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt,
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: imageDataUrl,
+                  detail: "high"
+                },
+              },
+            ],
+          },
+        ],
+        temperature: 0.1,
+      }),
+    });
 
-    const text = result.response.text();
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`xAI API error: ${errText}`);
+    }
+
+    const result = await response.json();
+    const text = result.choices?.[0]?.message?.content || "";
+    
     // Use regex to find the JSON part if the model added markdown blocks
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     const jsonData = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(text);
