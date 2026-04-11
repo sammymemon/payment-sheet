@@ -57,14 +57,14 @@ export async function POST(req: NextRequest) {
               {
                 type: "image_url",
                 image_url: {
-                  url: imageDataUrl,
-                  detail: "high"
+                  url: imageDataUrl
                 },
               },
             ],
           },
         ],
         temperature: 0.1,
+        max_tokens: 4000,
       }),
     });
 
