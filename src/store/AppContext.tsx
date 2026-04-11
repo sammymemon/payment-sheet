@@ -9,7 +9,7 @@ interface AppContextType {
   setCurrentUser: (user: User) => void;
   users: User[];
   setUsers: (users: User[]) => void;
-  addUser: (name: string, role: Role) => void;
+  addUser: (name: string, role: Role, email?: string) => void;
   removeUser: (id: string) => void;
   requests: PaymentRequest[];
   auditLogs: AuditLog[];
@@ -109,10 +109,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     localStorage.setItem('devx_users', JSON.stringify(users));
   }, [requests, auditLogs, users]);
 
-  const addUser = (name: string, role: Role) => {
+  const addUser = (name: string, role: Role, email?: string) => {
     const newUser: User = {
       id: uuidv4(),
       name,
+      email,
       role,
     };
     setUsers(prev => [...prev, newUser]);

@@ -10,12 +10,16 @@ import {
   Shield, 
   Link as LinkIcon, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  Mail,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 
 export const AdminView: React.FC = () => {
   const { users, addUser, removeUser } = useApp();
   const [newName, setNewName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<Role>('Purchase');
   const [showInviteLink, setShowInviteLink] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
@@ -25,21 +29,34 @@ export const AdminView: React.FC = () => {
   const handleAddUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (newName.trim()) {
-      addUser(newName.trim(), newRole);
+      addUser(newName.trim(), newRole, newEmail.trim() || undefined);
       setNewName('');
+      setNewEmail('');
     }
   };
 
-  const generateLink = (role: Role) => {
+  const getInviteLink = (role: Role) => {
     const baseUrl = window.location.origin;
-    const link = `${baseUrl}?role=${role}&invite=${Math.random().toString(36).substring(7)}`;
+    return `${baseUrl}?role=${role}`;
+  };
+
+  const sendEmailInvite = (user: any) => {
+    const link = getInviteLink(user.role);
+    const subject = encodeURIComponent('Invitation to DevX Payment Sheet');
+    const body = encodeURIComponent(`Hi ${user.name},\n\nYou have been invited to join the DevX Payment Sheet as a ${user.role}.\n\nPlease access your workspace here:\n${link}\n\nRegards,\nAdmin Team`);
+    window.location.href = `mailto:${user.email || ''}?subject=${subject}&body=${body}`;
+  };
+
+  const copyUserInvite = (user: any) => {
+    const link = getInviteLink(user.role);
+    navigator.clipboard.writeText(link);
+    alert(`Invite link for ${user.name} copied!`);
+  };
+
+  const generateLink = (role: Role) => {
+    const link = getInviteLink(role);
     setGeneratedLink(link);
     setShowInviteLink(true);
-    
-    // Auto-hide after some time or on click
-    setTimeout(() => {
-      // setShowInviteLink(false);
-    }, 10000);
   };
 
   const copyToClipboard = () => {
@@ -104,6 +121,16 @@ export const AdminView: React.FC = () => {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address (Optional)</label>
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="email@example.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Department / Role</label>
               <select
                 value={newRole}
@@ -163,7 +190,7 @@ export const AdminView: React.FC = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-xs text-gray-500">ID: {user.id.substring(0, 8)}...</div>
+                        <div className="text-xs text-gray-500">{user.email || 'No email'}</div>
                       </div>
                     </div>
                   </td>
@@ -184,14 +211,30 @@ export const AdminView: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      onClick={() => removeUser(user.id)}
-                      disabled={user.role === 'Admin' && users.filter(u => u.role === 'Admin').length <= 1}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-30 p-1 rounded hover:bg-red-50"
-                      title={user.role === 'Admin' ? "Cannot delete last admin" : "Delete user"}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex justify-end space-x-2">
+                      <button 
+                        onClick={() => sendEmailInvite(user)}
+                        title="Send Email Invite"
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <Mail className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => copyUserInvite(user)}
+                        title="Copy Invite Link"
+                        className="p-1.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
+                      <button 
+                        onClick={() => removeUser(user.id)}
+                        disabled={user.role === 'Admin' && users.filter(u => u.role === 'Admin').length <= 1}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-30"
+                        title={user.role === 'Admin' ? "Cannot delete last admin" : "Delete user"}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
