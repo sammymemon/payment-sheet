@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { formatCurrency, formatDate } from '../lib/utils';
-import { BookOpen, Search, Calendar, Download, RefreshCw, MoreVertical } from 'lucide-react';
+import { BookOpen, Search, Calendar, Download, RefreshCw, MoreVertical, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 export const RegisterView: React.FC = () => {
-  const { requests } = useApp();
+  const { requests, removeRequest } = useApp();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,9 +150,17 @@ export const RegisterView: React.FC = () => {
                     </span>
                     <div className="text-[10px] text-slate-500 uppercase mt-1 tracking-wider">{req.currentStage}</div>
                   </td>
-                  <td className="p-4 whitespace-nowrap text-right">
-                     <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <MoreVertical className="h-4 w-4" />
+                  <td className="table-cell text-right whitespace-nowrap">
+                     <button 
+                       onClick={() => {
+                         if (window.confirm("Are you sure you want to permanently delete this request?")) {
+                           removeRequest(req.id);
+                         }
+                       }} 
+                       className="p-1.5 text-[#8D8C86] hover:text-red-600 hover:bg-red-50 rounded transition-colors" 
+                       title="Delete"
+                     >
+                        <Trash2 className="h-4 w-4" />
                      </button>
                   </td>
                 </tr>

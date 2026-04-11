@@ -16,6 +16,7 @@ interface AppContextType {
   addRequest: (request: Partial<PaymentRequest>) => void;
   addRequests: (requests: Partial<PaymentRequest>[]) => void;
   updateRequest: (id: string, updates: Partial<PaymentRequest>, action: string, remarks?: string) => void;
+  removeRequest: (id: string) => void;
   getLogsForRequest: (requestId: string) => AuditLog[];
   activeTab: Role | 'Dashboard' | 'Admin';
   setActiveTab: (tab: Role | 'Dashboard' | 'Admin') => void;
@@ -256,6 +257,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addAuditLog(id, action, remarks);
   };
 
+  const removeRequest = (id: string) => {
+    setRequests((prev) => prev.filter((req) => req.id !== id));
+    setAuditLogs((prev) => prev.filter((log) => log.requestId !== id));
+  };
+
   const getLogsForRequest = (requestId: string) => {
     return auditLogs.filter((log) => log.requestId === requestId).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   };
@@ -274,6 +280,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addRequest,
         addRequests,
         updateRequest,
+        removeRequest,
         getLogsForRequest,
         activeTab,
         setActiveTab,

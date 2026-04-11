@@ -8,7 +8,7 @@ import { formatCurrency, cn } from '../lib/utils';
 import { motion } from 'framer-motion';
 
 export const PurchaseView: React.FC = () => {
-  const { requests, addRequests, updateRequest } = useApp();
+  const { requests, addRequests, updateRequest, removeRequest } = useApp();
   const [isCreating, setIsCreating] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
   const [pastedImage, setPastedImage] = useState<string | null>(null);
@@ -71,6 +71,12 @@ export const PurchaseView: React.FC = () => {
       updateRequest(editingId, editForm, 'Purchase Data Updated', 'Updated by Purchase');
       setEditingId(null);
       setEditForm({});
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Are you sure you want to permanently delete this request?")) {
+      removeRequest(id);
     }
   };
 
@@ -332,9 +338,12 @@ export const PurchaseView: React.FC = () => {
                             <span className="status-badge bg-blue-100 text-blue-700">{req.status}</span>
                             <div className="text-[10px] text-slate-500 uppercase mt-1 tracking-wider">{req.currentStage}</div>
                           </td>
-                          <td className="table-cell text-right">
-                            <button onClick={() => handleEditClick(req)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded">
+                          <td className="table-cell text-right whitespace-nowrap">
+                            <button onClick={() => handleEditClick(req)} className="p-1.5 text-[#8D8C86] hover:text-[#2A2A26] hover:bg-[#EBEAE5] rounded transition-colors mr-1" title="Edit">
                               <Edit2 className="h-4 w-4" />
+                            </button>
+                            <button onClick={() => handleDelete(req.id)} className="p-1.5 text-[#8D8C86] hover:text-red-600 hover:bg-red-50 rounded transition-colors" title="Delete">
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </td>
                         </>
