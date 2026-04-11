@@ -60,6 +60,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               {navItems.filter(item => {
                 if (currentUser.role === 'Admin') return true;
                 if (item.role === 'Dashboard') return true;
+                if (currentUser.role === 'Accounts' && item.role !== 'Admin') return true;
                 return currentUser.role === item.role;
               }).map((item) => {
                 const isActive = activeTab === item.role;
