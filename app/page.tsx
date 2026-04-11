@@ -8,9 +8,26 @@ import { ComplianceView } from '@/src/components/ComplianceView';
 import { PaymentsView } from '@/src/components/PaymentsView';
 import { DashboardView } from '@/src/components/DashboardView';
 import { RegisterView } from '@/src/components/RegisterView';
+import { AdminView } from '@/src/components/AdminView';
+import { useEffect } from 'react';
 
 const AppContent = () => {
-  const { currentUser } = useApp();
+  const { currentUser, setCurrentUser, users } = useApp();
+
+  // Handle invite links / direct role access via URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const roleParam = params.get('role');
+    
+    if (roleParam) {
+      const user = users.find(u => u.role === roleParam);
+      if (user) {
+        setCurrentUser(user);
+        // Clear param without reload
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [users, setCurrentUser]);
 
   const renderView = () => {
     switch (currentUser.role) {
@@ -24,6 +41,8 @@ const AppContent = () => {
         return <PaymentsView />;
       case 'Register':
         return <RegisterView />;
+      case 'Admin':
+        return <AdminView />;
       default:
         return <DashboardView />;
     }

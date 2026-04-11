@@ -10,7 +10,9 @@ import {
   ShieldCheck, 
   CreditCard,
   UserCircle,
-  BookOpen
+  BookOpen,
+  Settings,
+  Users as UsersIcon
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -18,15 +20,16 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { currentUser, setCurrentUser } = useApp();
+  const { currentUser, setCurrentUser, users } = useApp();
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, role: null },
+    { name: 'Dashboard', icon: LayoutDashboard, role: 'Dashboard' },
     { name: 'Purchase', icon: ShoppingCart, role: 'Purchase' },
     { name: 'Accounts', icon: Calculator, role: 'Accounts' },
     { name: 'Compliance', icon: ShieldCheck, role: 'Compliance' },
     { name: 'Payments', icon: CreditCard, role: 'Payments' },
     { name: 'Register', icon: BookOpen, role: 'Register' },
+    { name: 'Admin', icon: Settings, role: 'Admin' },
   ];
 
   return (
@@ -38,7 +41,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {navItems.filter(item => {
+            if (currentUser.role === 'Admin') return true;
+            if (item.role === 'Dashboard') return true;
+            return currentUser.role === item.role;
+          }).map((item) => {
             const isActive = currentUser.role === item.role || (!item.role && currentUser.role === 'Dashboard');
             // For simplicity, we just change the current user role to simulate switching views
             // In a real app, this would be route-based, but here we just use the role to filter views
@@ -46,15 +53,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <button
                 key={item.name}
                 onClick={() => {
-                  if (item.role) {
-                    const user = defaultUsers.find(u => u.role === item.role);
-                    if (user) {
-                      setCurrentUser(user);
-                    } else if (item.role === 'Register') {
-                      setCurrentUser({ id: 'admin-reg', name: 'Admin', role: 'Register' as any });
-                    }
+                  const user = users.find(u => u.role === item.role);
+                  if (user) {
+                    setCurrentUser(user);
                   } else {
-                    setCurrentUser({ id: 'admin', name: 'Admin', role: 'Dashboard' as any });
+                    // Fallback if no user exists for this role yet
+                    setCurrentUser({ id: `temp-${item.role}`, name: `Guest ${item.role}`, role: item.role as any });
                   }
                 }}
                 className={cn(

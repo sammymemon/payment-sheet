@@ -1,4 +1,4 @@
-export type Role = 'Purchase' | 'Accounts' | 'Compliance' | 'Payments' | 'Register' | 'Dashboard';
+export type Role = 'Purchase' | 'Accounts' | 'Compliance' | 'Payments' | 'Register' | 'Dashboard' | 'Admin';
 export type RequestStatus = 
   | 'Draft' 
   | 'Pending Accounts' 

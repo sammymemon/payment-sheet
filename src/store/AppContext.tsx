@@ -7,6 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 interface AppContextType {
   currentUser: User;
   setCurrentUser: (user: User) => void;
+  users: User[];
+  setUsers: (users: User[]) => void;
+  addUser: (name: string, role: Role) => void;
+  removeUser: (id: string) => void;
   requests: PaymentRequest[];
   auditLogs: AuditLog[];
   addRequest: (request: Partial<PaymentRequest>) => void;
@@ -16,6 +20,7 @@ interface AppContextType {
 }
 
 const defaultUsers: User[] = [
+  { id: 'u0', name: 'Master Admin', role: 'Admin' },
   { id: 'u1', name: 'Alice (Purchase)', role: 'Purchase' },
   { id: 'u2', name: 'Bob (Accounts)', role: 'Accounts' },
   { id: 'u3', name: 'Charlie (Compliance)', role: 'Compliance' },
@@ -57,6 +62,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User>(defaultUsers[0]);
+  const [users, setUsers] = useState<User[]>(defaultUsers);
   const [requests, setRequests] = useState<PaymentRequest[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
@@ -64,6 +70,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     const savedRequestsStr = localStorage.getItem('devx_requests');
     const savedLogsStr = localStorage.getItem('devx_logs');
+    const savedUsersStr = localStorage.getItem('devx_users');
+    
+    if (savedUsersStr) {
+      setUsers(JSON.parse(savedUsersStr));
+    }
     
     let loadedRequests: PaymentRequest[] = [];
     if (savedRequestsStr) {
@@ -95,7 +106,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     localStorage.setItem('devx_requests', JSON.stringify(requests));
     localStorage.setItem('devx_logs', JSON.stringify(auditLogs));
-  }, [requests, auditLogs]);
+    localStorage.setItem('devx_users', JSON.stringify(users));
+  }, [requests, auditLogs, users]);
+
+  const addUser = (name: string, role: Role) => {
+    const newUser: User = {
+      id: uuidv4(),
+      name,
+      role,
+    };
+    setUsers(prev => [...prev, newUser]);
+  };
+
+  const removeUser = (id: string) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+  };
 
   const addAuditLog = (requestId: string, action: string, remarks?: string) => {
     const newLog: AuditLog = {
@@ -228,6 +253,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       value={{
         currentUser,
         setCurrentUser,
+        users,
+        setUsers,
+        addUser,
+        removeUser,
         requests,
         auditLogs,
         addRequest,
