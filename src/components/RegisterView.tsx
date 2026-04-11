@@ -11,7 +11,8 @@ import {
   Download, 
   RefreshCw,
   MoreVertical,
-  ArrowRight
+  ArrowRight,
+  ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';

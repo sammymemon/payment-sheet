@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { RequestList } from './RequestList';
 import { PaymentRequest, CompanyName } from '../types';
-import { AlertCircle, Plus, Trash2, Edit2, Check, X, Image as ImageIcon, Upload, Loader2, ClipboardPaste } from 'lucide-react';
-import { formatCurrency } from '../lib/utils';
+import { AlertCircle, Plus, Trash2, Edit2, Check, X, Image as ImageIcon, Upload, Loader2, ClipboardPaste, Activity } from 'lucide-react';
+import { formatCurrency, cn } from '../lib/utils';
 
 import { motion } from 'framer-motion';
 

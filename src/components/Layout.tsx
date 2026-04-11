@@ -12,7 +12,6 @@ import {
   UserCircle,
   BookOpen,
   Settings,
-  Settings,
   Users as UsersIcon,
   ShieldAlert
 } from 'lucide-react';
