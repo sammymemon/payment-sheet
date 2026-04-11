@@ -13,142 +13,147 @@ import {
   BookOpen,
   Settings,
   Users as UsersIcon,
-  ShieldAlert
+  ShieldAlert,
+  Bell,
+  Search,
+  Menu
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-import { motion, AnimatePresence } from 'framer-motion';
-
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { currentUser, setCurrentUser, users, activeTab, setActiveTab } = useApp();
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, role: 'Dashboard', color: 'text-blue-600', bg: 'bg-blue-50' },
-    { name: 'Purchase', icon: ShoppingCart, role: 'Purchase', color: 'text-sky-600', bg: 'bg-sky-50' },
-    { name: 'Accounts', icon: Calculator, role: 'Accounts', color: 'text-amber-600', bg: 'bg-amber-50' },
-    { name: 'Compliance', icon: ShieldCheck, role: 'Compliance', color: 'text-purple-600', bg: 'bg-purple-50' },
-    { name: 'Payments', icon: CreditCard, role: 'Payments', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { name: 'Register', icon: BookOpen, role: 'Register', color: 'text-rose-600', bg: 'bg-rose-50' },
-    { name: 'Admin', icon: Settings, role: 'Admin', color: 'text-slate-600', bg: 'bg-slate-50' },
+    { name: 'Dashboard', icon: LayoutDashboard, role: 'Dashboard' },
+    { name: 'Purchase Requests', icon: ShoppingCart, role: 'Purchase' },
+    { name: 'Accounts Audit', icon: Calculator, role: 'Accounts' },
+    { name: 'Compliance Review', icon: ShieldCheck, role: 'Compliance' },
+    { name: 'Payments Processing', icon: CreditCard, role: 'Payments' },
+    { name: 'Master Register', icon: BookOpen, role: 'Register' },
+    { name: 'User Access', icon: UsersIcon, role: 'Admin' },
   ];
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] overflow-hidden text-slate-900 sélection:bg-blue-100 font-sans">
+    <div className="flex h-screen bg-[#f8fafc] overflow-hidden text-slate-900 font-sans">
       {/* Sidebar */}
-      <motion.aside 
-        initial={{ x: -280 }}
-        animate={{ x: 0 }}
-        className="w-72 bg-white border-r border-slate-200/60 flex flex-col z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]"
-      >
-        <div className="h-20 flex items-center px-8 border-b border-slate-100">
-          <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 mr-3">
-            <span className="text-white font-black text-xl italic tracking-tighter">DX</span>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-none">DevX</h1>
-            <span className="text-[10px] text-blue-600 font-bold uppercase tracking-widest bg-blue-50 px-1.5 py-0.5 rounded mt-1 inline-block">Enterprise</span>
-          </div>
-        </div>
-        
-        <nav className="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto">
-          {navItems.filter(item => {
-            if (currentUser.role === 'Admin') return true;
-            if (item.role === 'Dashboard') return true;
-            return currentUser.role === item.role;
-          }).map((item) => {
-            const isActive = activeTab === item.role;
-            return (
-              <button
-                key={item.name}
-                onClick={() => setActiveTab(item.role as any)}
-                className={cn(
-                  "sidebar-item group relative",
-                  isActive 
-                    ? "bg-blue-600 text-white shadow-xl shadow-blue-100" 
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
-                )}
-              >
-                <item.icon className={cn("mr-3 h-5 w-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : item.color)} />
-                <span className="font-semibold tracking-tight">{item.name}</span>
-                {isActive && (
-                  <motion.div 
-                    layoutId="active-pill" 
-                    className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full" 
-                  />
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="p-6 border-t border-slate-100 bg-slate-50/30">
-          <div className="flex items-center group cursor-pointer">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
-                 <UserCircle className="h-full w-full text-slate-400" />
+      <AnimatePresence initial={false}>
+        {sidebarOpen && (
+          <motion.aside 
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 260, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 h-full overflow-hidden"
+          >
+            <div className="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
+              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center mr-3">
+                <span className="text-white font-bold text-sm tracking-tighter">DX</span>
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+              <h1 className="text-sm font-semibold text-slate-900 tracking-tight">FinOps Portal</h1>
             </div>
-            <div className="ml-3 flex-1 overflow-hidden">
-              <p className="text-sm font-bold text-slate-800 truncate leading-tight">{currentUser.name}</p>
-              <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{currentUser.role} Role</p>
+            
+            <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+              {navItems.filter(item => {
+                if (currentUser.role === 'Admin') return true;
+                if (item.role === 'Dashboard') return true;
+                return currentUser.role === item.role;
+              }).map((item) => {
+                const isActive = activeTab === item.role;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => setActiveTab(item.role as any)}
+                    className={cn(
+                      "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+                      isActive 
+                        ? "bg-slate-100 text-slate-900" 
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
+                  >
+                    <item.icon className={cn("mr-3 h-4 w-4", isActive ? "text-slate-900" : "text-slate-500")} />
+                    {item.name}
+                  </button>
+                );
+              })}
             </div>
-            {currentUser.role !== 'Admin' && (
-              <button 
-                onClick={() => {
-                  const admin = users.find(u => u.role === 'Admin');
-                  if (admin) {
-                     setCurrentUser(admin);
-                     setActiveTab('Dashboard');
-                  }
-                }}
-                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-white rounded-lg transition-all"
-                title="Switch to Master Admin"
-              >
-                <ShieldAlert className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
-      </motion.aside>
+
+            <div className="p-4 border-t border-slate-100">
+              <div className="flex items-center">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
+                   <UserCircle className="h-5 w-5 text-slate-500" />
+                </div>
+                <div className="ml-3 flex-1 overflow-hidden">
+                  <p className="text-sm font-medium text-slate-700 truncate">{currentUser.name}</p>
+                  <p className="text-xs text-slate-500">{currentUser.role}</p>
+                </div>
+                {currentUser.role !== 'Admin' && (
+                  <button 
+                    onClick={() => {
+                      const admin = users.find(u => u.role === 'Admin');
+                      if (admin) {
+                         setCurrentUser(admin);
+                         setActiveTab('Dashboard');
+                      }
+                    }}
+                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-all"
+                    title="Switch to Admin"
+                  >
+                    <ShieldAlert className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 flex items-center px-10 justify-between shrink-0 z-10 shadow-sm shadow-slate-100/50">
-          <div>
-            <h2 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-500 bg-clip-text text-transparent">
-              {activeTab} Workspace
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between shrink-0 z-10 sticky top-0">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <h2 className="text-sm font-semibold text-slate-800">
+              {navItems.find(i => i.role === activeTab)?.name || activeTab}
             </h2>
-            <div className="flex items-center text-[10px] text-slate-400 mt-0.5 font-medium uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse" />
-              Live System Status: Optimal
-            </div>
           </div>
           
-          <div className="flex items-center space-x-6">
-             <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-200/50 shadow-inner">
-               <span className="text-[10px] text-slate-500 font-bold tracking-tighter uppercase whitespace-nowrap">Session Duration:</span>
-               <span className="text-[10px] text-slate-700 font-black tracking-widest">02:14:52</span>
+          <div className="flex items-center space-x-3">
+             <div className="hidden md:flex relative max-w-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-slate-400" />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  className="block w-64 pl-10 pr-3 py-1.5 border border-slate-300 rounded-md leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
+                />
              </div>
-             <button className="p-2.5 bg-slate-50 text-slate-500 rounded-xl hover:bg-white hover:text-slate-900 border border-slate-200/30 transition-all hover:shadow-sm">
-                <Settings className="h-5 w-5" />
+             <button className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors relative">
+                <Bell className="h-5 w-5" />
+                <span className="absolute top-1 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
              </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50/20 via-slate-50 to-white">
-          <div className="max-w-7xl mx-auto min-h-full">
+        <div className="flex-1 overflow-auto p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full"
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
               >
                 {children}
               </motion.div>
@@ -159,4 +164,3 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
-

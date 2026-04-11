@@ -3,20 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../store/AppContext';
 import { PaymentRequest } from '../types';
-import { formatCurrency } from '../lib/utils';
-import { 
-  CheckCircle2, 
-  ClipboardPaste, 
-  AlertCircle, 
-  ShieldCheck,
-  Search,
-  Activity,
-  ChevronRight,
-  Database
-} from 'lucide-react';
+import { formatCurrency, cn } from '../lib/utils';
+import { Check, ClipboardPaste, AlertCircle, Search, FileText } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '../lib/utils';
 
 type ComplianceEdit = {
   complianceStatus: 'All Okay' | 'All Not Okay' | '';
@@ -40,10 +30,7 @@ export const ComplianceView: React.FC = () => {
     let changed = false;
     pendingRequests.forEach(req => {
       if (!newEdits[req.id]) {
-        newEdits[req.id] = {
-          complianceStatus: req.complianceStatus || '',
-          remarks: '',
-        };
+        newEdits[req.id] = { complianceStatus: req.complianceStatus || '', remarks: '' };
         changed = true;
       }
     });
@@ -51,31 +38,19 @@ export const ComplianceView: React.FC = () => {
   }, [pendingRequests]);
 
   const updateEdit = (id: string, field: keyof ComplianceEdit, value: any) => {
-    setEdits(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value
-      }
-    }));
+    setEdits(prev => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
   };
 
   const handlePasteData = () => {
     if (!pasteText.trim()) return;
 
     const lines = pasteText.split('\n').map(l => l.split('\t'));
-    if (lines.length < 2) {
-      alert("Verification Error: Please paste data with headers and at least one payload row.");
-      return;
-    }
+    if (lines.length < 2) return alert("Please paste data with headers and at least one row.");
 
     const headers = lines[0].map(h => h.trim().toLowerCase());
     const vendorIdx = headers.findIndex(h => h.includes('name of party') || h.includes('vendor'));
 
-    if (vendorIdx === -1) {
-      alert("Data Mapping Error: Could not identify 'Name of Party' or 'Vendor' column.");
-      return;
-    }
+    if (vendorIdx === -1) return alert("Could not find a 'Vendor' or 'Name of Party' column.");
 
     const fuse = new Fuse(pendingRequests, { keys: ['vendorName'], threshold: 0.4 });
     const newEdits = { ...edits };
@@ -90,7 +65,6 @@ export const ComplianceView: React.FC = () => {
       const results = fuse.search(vendorName);
       if (results.length > 0) {
         const match: any = results[0].item;
-
         const rowData: Record<string, string> = {};
         for (let j = 0; j < headers.length; j++) {
           if (row[j] && row[j].trim() !== '') {
@@ -98,7 +72,6 @@ export const ComplianceView: React.FC = () => {
             rowData[originalHeader] = row[j].trim();
           }
         }
-
         newEdits[match.id] = {
           ...newEdits[match.id],
           complianceStatus: 'All Not Okay',
@@ -111,7 +84,7 @@ export const ComplianceView: React.FC = () => {
     setEdits(newEdits);
     setPasteText('');
     setShowPasteArea(false);
-    alert(`Intelligence Logic: Successfully matched and cross-referenced ${matchCount} records.`);
+    alert(`Matched and updated ${matchCount} records.`);
   };
 
   const handleApprove = (id: string) => {
@@ -130,101 +103,73 @@ export const ComplianceView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 animate-in">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Compliance Audit</h2>
-          <p className="text-sm text-slate-500 font-medium mt-1">Regulatory validation node for GST reconciliation and tax audits.</p>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Compliance Review</h2>
+          <p className="text-sm text-slate-500 mt-1">Verify GST details and compliance status.</p>
         </div>
         <button
           onClick={() => setShowPasteArea(!showPasteArea)}
-          className="mt-4 md:mt-0 px-6 py-3 bg-blue-600 text-white font-bold text-sm rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 flex items-center transition-all animate-pulse"
+          className="btn-secondary flex items-center"
         >
           <ClipboardPaste className="h-4 w-4 mr-2" />
-          <span>Cross-Reference GST Data</span>
+          Cross-check GST Data
         </button>
       </div>
 
       <AnimatePresence>
         {showPasteArea && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="bg-blue-900 p-8 rounded-[2rem] border border-blue-800 shadow-2xl relative overflow-hidden"
+            exit={{ opacity: 0, y: -10 }}
+            className="glass-card p-6 border-blue-200 bg-blue-50/50"
           >
-            <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-600/10 to-transparent pointer-events-none" />
-            <div className="flex items-start space-x-4 mb-6">
-              <div className="p-3 bg-blue-800 rounded-2xl shadow-inner">
-                 <AlertCircle className="h-6 w-6 text-blue-300" />
-              </div>
+            <div className="flex items-start space-x-3 mb-4">
+              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h4 className="text-lg font-black text-white">Neural GST Matching</h4>
-                <p className="text-xs text-blue-300 mt-1 max-w-xl font-medium tracking-wide">
-                  Paste raw spreadsheet data (TSV). The engine will fuzzy-match party names and automatically flag discrepancies as "All Not Okay" for manual review.
+                <h4 className="text-sm font-semibold text-slate-800">Bulk Cross-Check</h4>
+                <p className="text-xs text-slate-600 mt-1">
+                  Paste data from Excel here. We will match vendor names and highlight discrepancies.
                 </p>
               </div>
             </div>
             <textarea
-              className="w-full h-40 p-4 bg-slate-950/50 border border-blue-800 rounded-2xl text-sm font-medium text-blue-100 focus:ring-4 focus:ring-blue-500/20 outline-none transition-all custom-scrollbar placeholder:text-blue-900"
-              placeholder="Paste raw Excel cells here (Ctrl+V)..."
+              className="input-field h-32 font-mono text-xs"
+              placeholder="Paste TSV data here..."
               value={pasteText}
               onChange={e => setPasteText(e.target.value)}
             />
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={() => setShowPasteArea(false)}
-                className="px-6 py-2.5 text-xs font-bold text-blue-300 hover:text-white transition-colors"
-              >
-                Aborted Logic
-              </button>
-              <button
-                onClick={handlePasteData}
-                className="px-8 py-3 bg-white text-blue-900 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-blue-50 shadow-lg active:scale-95 transition-all"
-              >
-                Start Matching Protocol
-              </button>
+            <div className="mt-4 flex justify-end space-x-3">
+              <button onClick={() => setShowPasteArea(false)} className="btn-secondary">Cancel</button>
+              <button onClick={handlePasteData} className="btn-primary">Process Data</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Table Section */}
       <div className="glass-card overflow-hidden">
-        <div className="px-10 py-6 border-b border-slate-100 bg-white flex justify-between items-center">
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Compliance Ledger</h3>
-            <div className="px-3 py-1 bg-purple-50 text-[10px] font-bold text-purple-600 rounded-full uppercase tracking-widest">Regulatory Mode</div>
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50">
+          <h3 className="text-base font-semibold text-slate-800">Pending Reviews</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-900">
+          <table className="min-w-full divide-y divide-slate-200 border-b border-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                <th colSpan={3} className="px-6 py-4 text-center text-[10px] font-bold text-white/50 uppercase tracking-widest border-r border-white/5 whitespace-nowrap">Source Data</th>
-                <th colSpan={2} className="px-6 py-4 text-center text-[10px] font-bold text-blue-400 uppercase tracking-widest border-r border-white/5 bg-blue-900/10 whitespace-nowrap">Audit Values</th>
-                <th colSpan={3} className="px-6 py-4 text-center text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-900/10 whitespace-nowrap">Compliance Logic</th>
-              </tr>
-              <tr>
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-white uppercase tracking-widest">Entity / context</th>
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-white uppercase tracking-widest">Reference</th>
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-white uppercase tracking-widest border-r border-white/5">Orig. Sum</th>
-                
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10">Bill Sum</th>
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10 border-r border-white/5">Net Pay</th>
-
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-900/10">Status</th>
-                <th className="px-8 py-5 text-left text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-900/10">Audit Remarks</th>
-                <th className="px-8 py-5 text-center text-[10px] font-bold text-purple-400 uppercase tracking-widest bg-purple-900/10">Ops</th>
+                <th className="table-header">Vendor Details</th>
+                <th className="table-header">PO Amount</th>
+                <th className="table-header">Final Payable</th>
+                <th className="table-header w-48">Status</th>
+                <th className="table-header w-64">Remarks</th>
+                <th className="table-header text-center w-24">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 bg-white">
+            <tbody className="bg-white divide-y divide-slate-200">
               {pendingRequests.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-10 py-24 text-center">
-                    <div className="flex flex-col items-center">
-                       <ShieldCheck className="h-16 w-16 text-emerald-100 mb-6" />
-                       <p className="text-sm font-black text-slate-300 uppercase tracking-[0.2em]">Audit Buffer Cleared</p>
-                    </div>
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-500">
+                    No requests pending compliance review.
                   </td>
                 </tr>
               ) : (
@@ -233,104 +178,86 @@ export const ComplianceView: React.FC = () => {
 
                   return (
                     <React.Fragment key={req.id}>
-                      <tr className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-8 py-6">
-                          <div className="text-sm font-bold text-slate-900 leading-tight">{req.projectName}</div>
-                          <div className="text-[11px] font-medium text-slate-500 mt-1">{req.vendorName}</div>
+                      <tr className="hover:bg-slate-50">
+                        <td className="p-3">
+                          <div className="text-sm font-medium text-slate-900">{req.projectName}</div>
+                          <div className="text-xs text-slate-500">{req.vendorName}</div>
+                          <div className="text-[10px] text-slate-400 mt-1">{req.poNumber}</div>
                         </td>
-                        <td className="px-8 py-6">
-                          <div className="text-[11px] font-black text-slate-800 uppercase tracking-tighter">{req.poNumber}</div>
+                        <td className="p-3">
+                          <div className="text-sm text-slate-500">{formatCurrency(req.poAmount)}</div>
                         </td>
-                        <td className="px-8 py-6 border-r border-slate-100">
-                          <div className="text-[11px] font-medium text-slate-400">{formatCurrency(req.poAmount)}</div>
-                          <div className="text-sm font-black text-rose-500 mt-1">{formatCurrency(req.needToPayAmount)}</div>
+                        <td className="p-3">
+                          <div className="text-sm font-semibold text-slate-900">{formatCurrency(req.payableAfterTds || 0)}</div>
                         </td>
-
-                        <td className="px-8 py-6 bg-blue-50/30">
-                          <div className="text-sm font-black text-blue-800">{formatCurrency(req.billAmount || 0)}</div>
-                        </td>
-                        <td className="px-8 py-6 bg-blue-50/30 border-r border-slate-100">
-                          <div className="text-sm font-black text-slate-900">{formatCurrency(req.payableAfterTds || 0)}</div>
-                        </td>
-
-                        <td className="px-8 py-6 bg-purple-50/30">
+                        <td className="p-3">
                           <select
                             className={cn(
-                              "input-field py-2 text-[11px] font-black uppercase tracking-wider bg-white shadow-sm",
-                              edit.complianceStatus === 'All Okay' ? 'text-emerald-600 border-emerald-100 ring-4 ring-emerald-500/10' :
-                              edit.complianceStatus === 'All Not Okay' ? 'text-rose-600 border-rose-100 ring-4 ring-rose-500/10' : 'text-slate-600'
+                              "input-field py-1.5 text-xs font-medium",
+                              edit.complianceStatus === 'All Okay' ? 'text-green-700 bg-green-50 border-green-200' :
+                              edit.complianceStatus === 'All Not Okay' ? 'text-red-700 bg-red-50 border-red-200' : ''
                             )}
                             value={edit.complianceStatus}
                             onChange={e => updateEdit(req.id, 'complianceStatus', e.target.value)}
                           >
-                            <option value="">-- PENDING --</option>
-                            <option value="All Okay">ALL OKAY</option>
-                            <option value="All Not Okay">ALL NOT OKAY</option>
+                            <option value="">-- Pending --</option>
+                            <option value="All Okay">All Okay</option>
+                            <option value="All Not Okay">All Not Okay</option>
                           </select>
                         </td>
-                        <td className="px-8 py-6 bg-purple-50/30 border-r border-slate-100 min-w-[200px]">
-                          <input type="text" placeholder="Add audit note..." className="input-field py-2 text-xs font-medium bg-white"
+                        <td className="p-3">
+                          <input type="text" placeholder="Notes..." className="input-field py-1.5 text-xs"
                             value={edit.remarks} onChange={e => updateEdit(req.id, 'remarks', e.target.value)} />
                         </td>
-
-                        <td className="px-8 py-6 bg-purple-50/30">
+                        <td className="p-3 align-middle text-center">
                           <button 
                             onClick={() => handleApprove(req.id)} 
                             disabled={!edit.complianceStatus}
                             className={cn(
-                              "w-12 h-12 rounded-2xl flex items-center justify-center transition-all shadow-lg active:scale-90",
+                              "p-2 rounded-md transition-colors",
                               edit.complianceStatus 
-                                ? "bg-emerald-600 text-white shadow-emerald-500/20 hover:bg-emerald-700" 
-                                : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                                ? "bg-slate-900 text-white hover:bg-slate-800" 
+                                : "bg-slate-100 text-slate-400 cursor-not-allowed"
                             )}
                           >
-                            <CheckCircle2 className="h-6 w-6" />
+                            <Check className="h-4 w-4" />
                           </button>
                         </td>
                       </tr>
                       {/* Cross-Reference Data Sub-row */}
-                      <AnimatePresence>
-                        {edit.pastedData && edit.pastedData.length > 0 && (
-                          <motion.tr 
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                          >
-                            <td colSpan={8} className="p-0 bg-rose-50/50">
-                              <div className="p-8 border-l-8 border-rose-500 shadow-inner">
-                                <div className="flex items-center space-x-2 mb-6 text-rose-800">
-                                   <Database className="h-4 w-4" />
-                                   <h4 className="text-xs font-black uppercase tracking-[0.2em]">External Reference Discrepancy detected</h4>
-                                </div>
-                                <div className="overflow-x-auto rounded-2xl border border-rose-200 bg-white">
-                                  <table className="min-w-full divide-y divide-rose-100">
-                                    <thead>
-                                      <tr className="bg-rose-50">
-                                        {Object.keys(edit.pastedData[0]).map((key, idx) => (
-                                          <th key={idx} className="px-5 py-3 text-left text-[10px] font-black text-rose-700 uppercase tracking-widest">
-                                            {key}
-                                          </th>
+                      {edit.pastedData && edit.pastedData.length > 0 && (
+                        <tr className="bg-red-50/30">
+                          <td colSpan={6} className="px-6 py-4">
+                            <div className="border-l-2 border-red-400 pl-4">
+                              <h4 className="text-xs font-semibold text-red-800 mb-2 flex items-center">
+                                <AlertCircle className="h-3 w-3 mr-1.5" /> Discrepancy Found in Upload
+                              </h4>
+                              <div className="overflow-x-auto bg-white rounded border border-red-100 shadow-sm">
+                                <table className="min-w-full divide-y divide-red-100">
+                                  <thead>
+                                    <tr className="bg-red-50/50">
+                                      {Object.keys(edit.pastedData[0]).map((key, idx) => (
+                                        <th key={idx} className="px-3 py-2 text-left text-[10px] font-semibold text-red-700 uppercase tracking-wider">
+                                          {key}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-red-50 text-[11px] text-slate-700">
+                                    {edit.pastedData.map((row, rowIdx) => (
+                                      <tr key={rowIdx}>
+                                        {Object.values(row).map((val, colIdx) => (
+                                          <td key={colIdx} className="px-3 py-2 whitespace-nowrap">{val}</td>
                                         ))}
                                       </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-rose-50">
-                                      {edit.pastedData.map((row, rowIdx) => (
-                                        <tr key={rowIdx} className="hover:bg-rose-50/40">
-                                          {Object.values(row).map((val, colIdx) => (
-                                            <td key={colIdx} className="px-5 py-3 text-xs font-bold text-rose-900 whitespace-nowrap">
-                                              {val}
-                                            </td>
-                                          ))}
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
-                            </td>
-                          </motion.tr>
-                        )}
-                      </AnimatePresence>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                     </React.Fragment>
                   );
                 })
@@ -340,47 +267,44 @@ export const ComplianceView: React.FC = () => {
         </div>
       </div>
 
-      {/* Processed History Ledger */}
-      <div className="glass-card overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
-        <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
-          <h3 className="text-lg font-black text-slate-600 tracking-tight uppercase tracking-[0.1em]">Compliance Archives</h3>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Audited: {processedRequests.length}</span>
+      {/* Processed History */}
+      <div className="glass-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+          <h3 className="text-base font-semibold text-slate-800">Processed Reviews</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-100">
-            <thead className="bg-slate-50/80">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-slate-50">
               <tr>
-                <th className="px-10 py-5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entity context</th>
-                <th className="px-10 py-5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resolution Net</th>
-                <th className="px-10 py-5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Compliance Vector</th>
-                <th className="px-10 py-5 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pipeline Status</th>
+                <th className="table-header">Vendor Details</th>
+                <th className="table-header">Payable Amount</th>
+                <th className="table-header">Compliance Status</th>
+                <th className="table-header">Pipeline Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50 bg-white">
+            <tbody className="bg-white divide-y divide-slate-200">
               {processedRequests.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-10 py-12 text-center text-xs font-bold text-slate-200 uppercase tracking-widest">Archive Empty</td>
-                </tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">No historical reviews found.</td></tr>
               ) : (
                 processedRequests.map(req => (
-                  <tr key={req.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-10 py-6">
-                      <div className="text-sm font-bold text-slate-700 leading-tight">{req.projectName}</div>
-                      <div className="text-[10px] font-medium text-slate-500 mt-1">{req.vendorName}</div>
+                  <tr key={req.id} className="hover:bg-slate-50">
+                    <td className="table-cell">
+                      <div className="font-medium text-slate-900">{req.projectName}</div>
+                      <div className="text-xs text-slate-500">{req.vendorName}</div>
                     </td>
-                    <td className="px-10 py-6">
-                      <div className="text-sm font-black text-slate-900 tracking-tight">{formatCurrency(req.finalPayableAmount || 0)}</div>
+                    <td className="table-cell font-medium text-slate-900">
+                      {formatCurrency(req.finalPayableAmount || 0)}
                     </td>
-                    <td className="px-10 py-6">
+                    <td className="table-cell">
                       <span className={cn(
                         "status-badge",
-                        req.complianceStatus === 'All Okay' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'
+                        req.complianceStatus === 'All Okay' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                       )}>
-                        {req.complianceStatus || 'UNSET'}
+                        {req.complianceStatus}
                       </span>
                     </td>
-                    <td className="px-10 py-6">
-                      <span className="status-badge bg-blue-50 text-blue-700 border border-blue-100">{req.status}</span>
+                    <td className="table-cell">
+                      <span className="status-badge bg-slate-100 text-slate-700">{req.status}</span>
                     </td>
                   </tr>
                 ))
