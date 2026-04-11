@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
-    const apiKey = process.env.GROK_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "GROK_API_KEY not configured in environment variables" }, { status: 500 });
+      return NextResponse.json({ error: "GROQ_API_KEY not configured in environment variables" }, { status: 500 });
     }
 
     // Ensure the image string has the correct Data URL prefix otherwise xAI might reject it.
@@ -37,15 +37,15 @@ export async function POST(req: NextRequest) {
       - Look closely at column headers like "Project", "Vendor Name", "Work", "PO NO", "PO AMOUNT", "Paid Amount", "Need to Pay".
     `;
 
-    // Fetch from xAI
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    // Fetch from Groq LPU inference engine
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "grok-2-vision-1212", 
+        model: "llama-3.2-90b-vision-preview", 
         messages: [
           {
             role: "user",
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`xAI API error: ${errText}`);
+      throw new Error(`Groq API error: ${errText}`);
     }
 
     const result = await response.json();
