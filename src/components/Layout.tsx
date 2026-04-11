@@ -12,7 +12,9 @@ import {
   UserCircle,
   BookOpen,
   Settings,
-  Users as UsersIcon
+  Settings,
+  Users as UsersIcon,
+  ShieldAlert
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -53,17 +55,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <button
                 key={item.name}
                 onClick={() => {
-                  if (currentUser.role === 'Admin') {
-                    setActiveTab(item.role as any);
-                  } else {
-                    const user = users.find(u => u.role === item.role);
-                    if (user) {
-                      setCurrentUser(user);
-                    } else {
-                      setCurrentUser({ id: `temp-${item.role}`, name: `Guest ${item.role}`, role: item.role as any });
-                    }
-                    setActiveTab(item.role as any);
-                  }
+                  // Sidebar now only switches the view, not the user identity.
+                  // Only Admins can see all tabs anyway due to the filter.
+                  setActiveTab(item.role as any);
                 }}
                 className={cn(
                   "w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors",
@@ -82,10 +76,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center">
             <UserCircle className="h-8 w-8 text-gray-400" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">{currentUser.name}</p>
-              <p className="text-xs text-gray-500">{currentUser.role} Dept</p>
+            <div className="ml-3 flex-1 overflow-hidden">
+              <p className="text-sm font-medium text-gray-700 truncate">{currentUser.name}</p>
+              <p className="text-xs text-gray-500">{currentUser.role} Role</p>
             </div>
+            {currentUser.role !== 'Admin' && (
+              <button 
+                onClick={() => {
+                  const admin = users.find(u => u.role === 'Admin');
+                  if (admin) {
+                     setCurrentUser(admin);
+                     setActiveTab('Dashboard');
+                  }
+                }}
+                className="ml-2 p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Switch to Master Admin"
+              >
+                <ShieldAlert className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </aside>
