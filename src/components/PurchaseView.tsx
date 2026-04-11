@@ -7,6 +7,8 @@ import { PaymentRequest, CompanyName } from '../types';
 import { AlertCircle, Plus, Trash2, Edit2, Check, X, Image as ImageIcon, Upload, Loader2, ClipboardPaste } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
+import { motion } from 'framer-motion';
+
 export const PurchaseView: React.FC = () => {
   const { requests, addRequests, updateRequest } = useApp();
   const [isCreating, setIsCreating] = useState(false);
@@ -111,7 +113,6 @@ export const PurchaseView: React.FC = () => {
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
-    // 1. Check for Image
     const imageItem = e.clipboardData.items[0];
     if (imageItem?.type.includes('image')) {
       const blob = imageItem.getAsFile();
@@ -125,7 +126,6 @@ export const PurchaseView: React.FC = () => {
       return;
     }
 
-    // 2. Check for Text (TSV from Excel/Sheets)
     const textData = e.clipboardData.getData('text/plain');
     if (textData && textData.includes('\t')) {
       try {
@@ -148,7 +148,7 @@ export const PurchaseView: React.FC = () => {
         
         if (newRows.length > 0) {
           setRows(newRows);
-          alert(`Successfully pasted ${newRows.length} rows from clipboard!`);
+          alert(`Success: Synced ${newRows.length} rows from clipboard.`);
         }
       } catch (err) {
         console.error("Paste error", err);
@@ -167,216 +167,216 @@ export const PurchaseView: React.FC = () => {
         body: JSON.stringify({ image: pastedImage }),
       });
       
-      if (!response.ok) throw new Error('Extraction failed');
+      if (!response.ok) throw new Error('AI Extraction Pipeline Offline');
       
       const data = await response.json();
       if (data.error) throw new Error(data.error);
       
       if (Array.isArray(data)) {
-        // Map data to the internal row structure
         const newRows = data.map(item => ({
           ...initialRow,
           ...item
         }));
         setRows(newRows);
-        setPastedImage(null); // Clear image after successful extraction
-        alert(`Successfully extracted ${data.length} rows!`);
+        setPastedImage(null);
+        alert(`AI Sync Complete: ${data.length} records processed.`);
       }
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'Failed to extract data. Please ensure GEMINI_API_KEY is set or try a clearer image.');
+      alert(error.message || 'AI Extraction Failed. Check system logs.');
     } finally {
       setIsExtracting(false);
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-10 animate-in">
+      <div className="flex justify-between items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Purchase Department</h2>
-          <p className="text-sm text-gray-500 mt-1">Initiate new payment requests.</p>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Purchase Gateway</h2>
+          <p className="text-sm text-slate-500 font-medium mt-1">Initiation node for global procurement settlements.</p>
         </div>
         <button
           onClick={() => setIsCreating(!isCreating)}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          className={cn(
+            "px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center shadow-lg",
+            isCreating 
+              ? "bg-slate-100 text-slate-600 hover:bg-slate-200" 
+              : "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20"
+          )}
         >
-          {isCreating ? 'Cancel' : 'New Request'}
+          {isCreating ? <X className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+          {isCreating ? 'Abort Operation' : 'Initialize Request'}
         </button>
       </div>
 
-      {/* Need to Pay Box */}
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center shadow-sm">
-        <div className="p-3 bg-red-100 rounded-lg">
-          <AlertCircle className="h-6 w-6 text-red-600" />
+      <div className="bg-rose-50 border border-rose-100 rounded-[2rem] p-6 flex items-center shadow-xl shadow-rose-500/5 relative overflow-hidden group">
+        <div className="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-rose-100/50 to-transparent pointer-events-none" />
+        <div className="p-4 bg-white rounded-2xl shadow-sm group-hover:scale-110 transition-transform duration-500">
+          <AlertCircle className="h-7 w-7 text-rose-600" />
         </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-red-800">High Priority (Need to Pay)</p>
-          <p className="text-2xl font-bold text-red-900">{needToPayCount} <span className="text-sm font-medium text-red-700">Pending Requests</span></p>
+        <div className="ml-6">
+          <p className="text-xs font-black text-rose-500 uppercase tracking-widest mb-1">Priority Surveillance</p>
+          <p className="text-3xl font-black text-rose-900">{needToPayCount} <span className="text-sm font-bold text-rose-700/60 uppercase tracking-tight">Critical Exceptions Pending</span></p>
         </div>
       </div>
 
       {isCreating ? (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-medium text-gray-900">Create Payment Requests</h3>
-            <div className="flex space-x-2">
-              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded flex items-center">
-                <ClipboardPaste className="h-3 w-3 mr-1" />
-                Tip: Paste image (Ctrl+V) or Excel rows anywhere
-              </span>
+        <motion.div 
+           initial={{ opacity: 0, scale: 0.98 }}
+           animate={{ opacity: 1, scale: 1 }}
+           className="glass-card p-10 bg-white"
+        >
+          <div className="flex justify-between items-center mb-10">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Dispatch Configuration</h3>
+            <div className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full border border-blue-100 shadow-inner">
+               <ClipboardPaste className="h-4 w-4" />
+               <span className="text-[10px] font-black uppercase tracking-widest leading-none">Smart-Sync Active</span>
             </div>
           </div>
-
+          
           <div 
             onPaste={handlePaste}
-            className="mb-8 p-8 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:bg-gray-100/50 hover:border-blue-300 transition-all group relative overflow-hidden"
+            className="mb-10 p-12 border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50/50 hover:bg-blue-50/30 hover:border-blue-300 transition-all group relative overflow-hidden flex flex-col items-center justify-center text-center"
           >
-            <div className="absolute top-2 right-2 flex space-x-1">
-              <span className="text-[10px] uppercase font-bold text-gray-400 bg-white px-1.5 py-0.5 rounded border border-gray-200">AI Powered</span>
+            <div className="absolute top-4 right-4 flex space-x-1">
+              <span className="text-[10px] uppercase font-black text-blue-500 bg-blue-100/50 px-2 py-1 rounded-lg border border-blue-200">Neural Extractor v1.5</span>
             </div>
             {pastedImage ? (
-              <div className="flex flex-col items-center space-y-4">
-                <img src={pastedImage} alt="Pasted" className="max-h-48 rounded shadow-sm border border-gray-200" />
-                <div className="flex space-x-3">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="relative p-2 bg-white rounded-2xl shadow-xl">
+                  <img src={pastedImage} alt="Pasted" className="max-h-56 rounded-xl" />
+                </div>
+                <div className="flex space-x-4">
                   <button 
                     type="button"
                     onClick={extractData}
                     disabled={isExtracting}
-                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 flex items-center shadow-md disabled:opacity-50"
+                    className="btn-primary flex items-center"
                   >
                     {isExtracting ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     ) : (
                       <Check className="h-4 w-4 mr-2" />
                     )}
-                    {isExtracting ? 'Extracting Data...' : 'Auto-Fill from Image'}
+                    {isExtracting ? 'Decrypting Image...' : 'Execute Data Extraction'}
                   </button>
                   <button 
                     type="button"
                     onClick={() => setPastedImage(null)}
-                    className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+                    className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 font-bold text-sm rounded-xl hover:bg-slate-50 transition-all"
                   >
-                    Clear
+                    Clear Canvas
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-center">
-                <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 mb-3 group-hover:scale-110 transition-transform">
-                  <ImageIcon className="h-6 w-6 text-gray-400 group-hover:text-blue-500" />
+              <>
+                <div className="mx-auto w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center shadow-xl border border-slate-100 mb-6 group-hover:scale-110 transition-transform duration-500">
+                  <ImageIcon className="h-7 w-7 text-blue-500" />
                 </div>
-                <p className="text-sm font-medium text-gray-700">Paste an image or click to upload</p>
-                <p className="text-xs text-gray-500 mt-1">Excel screenshot, Payment sheet photo, etc.</p>
+                <h4 className="text-lg font-black text-slate-800">Quantum Clipboard Drop</h4>
+                <p className="text-xs text-slate-500 mt-2 font-medium">Paste image (Ctrl+V) or click to browse payment sheets.</p>
                 <input 
                   type="file" 
                   accept="image/*" 
                   onChange={handleImageUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
-              </div>
+              </>
             )}
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Global Details (Once) */}
-            <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider">Global Details (Applies to all rows)</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <div className="p-8 rounded-[2rem] bg-slate-50/50 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                  <select required className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Entity Profile</label>
+                  <select required className="input-field font-bold text-slate-800"
                     value={companyName} onChange={e => setCompanyName(e.target.value as CompanyName)}>
-                    <option value="">-- Select Company --</option>
+                    <option value="">-- Select Corporate Entity --</option>
                     <option value="Dev Accelerator Limited">Dev Accelerator Limited</option>
                     <option value="Needle & Thread LLP">Needle & Thread LLP</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
-                  <input required type="date" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Dispatch Timestamp</label>
+                  <input required type="date" className="input-field font-bold text-slate-800"
                     value={paymentDate} onChange={e => setPaymentDate(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
-                  <input required type="text" placeholder="Enter sender name" className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Origin Agent</label>
+                  <input required type="text" placeholder="Enter full name" className="input-field font-bold text-slate-800 placeholder:text-slate-300"
                     value={senderName} onChange={e => setSenderName(e.target.value)} />
                 </div>
-              </div>
             </div>
 
-            {/* Dynamic Rows as Excel-like Table */}
-            <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="overflow-hidden border border-slate-100 rounded-[2rem] bg-white shadow-2xl shadow-slate-200/50">
+              <table className="min-w-full">
+                <thead className="bg-slate-900">
                   <tr>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Project Name</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Vendor Name</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Nature of Work</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">PO Number</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Type</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">PO Amount</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Already Paid</th>
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Need to Pay</th>
-                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Priority</th>
-                    <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"></th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Project ID</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Vendor Link</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Nature</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">PO ID</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Type</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Amount</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Paid</th>
+                    <th className="px-5 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Required</th>
+                    <th className="px-5 py-4 text-center text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Pri.</th>
+                    <th className="px-5 py-4"></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-slate-50">
                   {rows.map((row, index) => (
-                    <tr key={index} className="hover:bg-blue-50/50 transition-colors group">
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="text" placeholder="Project" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                    <tr key={index} className="hover:bg-blue-50 transition-colors group">
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="text" placeholder="Project" className="w-full px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm font-bold border-0" 
                           value={row.projectName} onChange={e => updateRow(index, 'projectName', e.target.value)} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="text" placeholder="Vendor" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="text" placeholder="Vendor" className="w-full px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm font-bold border-0" 
                           value={row.vendorName} onChange={e => updateRow(index, 'vendorName', e.target.value)} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="text" placeholder="Work details" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="text" placeholder="Details" className="w-full px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-[11px] font-medium border-0" 
                           value={row.natureOfWork} onChange={e => updateRow(index, 'natureOfWork', e.target.value)} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="text" placeholder="PO-XXX" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="text" placeholder="PO-000" className="w-full px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-[11px] font-black border-0" 
                           value={row.poNumber} onChange={e => updateRow(index, 'poNumber', e.target.value)} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <select className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm"
+                      <td className="p-0 border-r border-slate-50">
+                        <select className="w-full px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-xs font-bold border-0"
                           value={row.paymentType} onChange={e => updateRow(index, 'paymentType', e.target.value)}>
                           <option value="Advance">Advance</option>
                           <option value="Partial">Partial</option>
                           <option value="Final">Final</option>
                         </select>
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="number" min="0" placeholder="0" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="number" min="0" placeholder="0" className="w-24 px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-[11px] font-black border-0" 
                           value={row.poAmount || ''} onChange={e => updateRow(index, 'poAmount', Number(e.target.value))} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="number" min="0" placeholder="0" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="number" min="0" placeholder="0" className="w-24 px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-[11px] font-medium text-slate-400 border-0" 
                           value={row.alreadyPaidAmount || ''} onChange={e => updateRow(index, 'alreadyPaidAmount', Number(e.target.value))} />
                       </td>
-                      <td className="p-0 border-r border-gray-100">
-                        <input required type="number" min="0" placeholder="0" className="w-full px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm font-medium text-blue-700" 
+                      <td className="p-0 border-r border-slate-50">
+                        <input required type="number" min="0" placeholder="0" className="w-24 px-5 py-4 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm font-black text-blue-600 border-0" 
                           value={row.needToPayAmount || ''} onChange={e => updateRow(index, 'needToPayAmount', Number(e.target.value))} />
                       </td>
-                      <td className="p-0 border-r border-gray-100 text-center align-middle">
-                        <div className="flex items-center justify-center h-full w-full py-3">
-                          <input type="checkbox" title="High Priority" className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded cursor-pointer"
+                      <td className="p-0 border-r border-slate-50 text-center align-middle">
+                        <div className="flex items-center justify-center p-4">
+                          <input type="checkbox" className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-slate-300 rounded cursor-pointer transition-transform group-hover:scale-125"
                             checked={row.needToPay} onChange={e => updateRow(index, 'needToPay', e.target.checked)} />
                         </div>
                       </td>
-                      <td className="p-0 text-center align-middle w-10">
-                        <div className="flex items-center justify-center h-full w-full py-3">
-                          {rows.length > 1 ? (
-                            <button type="button" onClick={() => handleRemoveRow(index)} className="text-gray-400 hover:text-red-600 transition-colors" title="Remove Row">
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          ) : (
-                            <div className="w-4 h-4"></div>
-                          )}
-                        </div>
+                      <td className="p-0 text-center align-middle w-12">
+                        {rows.length > 1 && (
+                          <button type="button" onClick={() => handleRemoveRow(index)} className="p-4 text-slate-300 hover:text-rose-600 transition-colors">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -384,79 +384,88 @@ export const PurchaseView: React.FC = () => {
               </table>
             </div>
 
-            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-              <button type="button" onClick={handleAddRow} className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm flex items-center">
+            <div className="flex justify-between items-center p-8 bg-slate-50/50">
+              <button type="button" onClick={handleAddRow} className="px-6 py-3 bg-white border border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-slate-100 transition-all flex items-center shadow-sm">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Another Row
+                Add Stream Entry
               </button>
-              <button type="submit" className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                Submit All to Accounts
+              <button type="submit" className="px-10 py-4 bg-blue-600 text-white text-sm font-black uppercase tracking-widest rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-500/20 active:scale-95 transition-all">
+                Authorize & Dispatch to Accounts
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h3 className="text-lg font-medium text-gray-900">All Requests</h3>
+        <div className="glass-card overflow-hidden">
+          <div className="px-10 py-6 border-b border-slate-100 flex justify-between items-center bg-white">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Transmission History</h3>
+            <div className="flex space-x-2">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Requests: {myRequests.length}</span>
+            </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-100">
+              <thead className="bg-slate-50/30">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO No</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Need to Pay</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Context</th>
+                  <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reference</th>
+                  <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Financials</th>
+                  <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Surveillance Status</th>
+                  <th className="px-10 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">Operations</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-slate-50 bg-white">
                 {myRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">No requests found.</td>
+                    <td colSpan={5} className="px-10 py-16 text-center text-sm font-medium text-slate-400 uppercase tracking-widest">
+                      <div className="flex flex-col items-center">
+                        <Activity className="h-10 w-10 text-slate-100 mb-4" />
+                        No active transmissions detected.
+                      </div>
+                    </td>
                   </tr>
                 ) : (
                   myRequests.map(req => (
-                    <tr key={req.id} className="hover:bg-gray-50">
+                    <tr key={req.id} className="hover:bg-blue-50 transition-all duration-300">
                       {editingId === req.id ? (
                         <>
-                          <td className="px-4 py-2"><input type="text" className="w-full px-2 py-1 border rounded text-sm" value={editForm.projectName || ''} onChange={e => setEditForm({...editForm, projectName: e.target.value})} /></td>
-                          <td className="px-4 py-2"><input type="text" className="w-full px-2 py-1 border rounded text-sm" value={editForm.vendorName || ''} onChange={e => setEditForm({...editForm, vendorName: e.target.value})} /></td>
-                          <td className="px-4 py-2"><input type="text" className="w-full px-2 py-1 border rounded text-sm" value={editForm.poNumber || ''} onChange={e => setEditForm({...editForm, poNumber: e.target.value})} /></td>
-                          <td className="px-4 py-2"><input type="number" className="w-full px-2 py-1 border rounded text-sm" value={editForm.poAmount || 0} onChange={e => setEditForm({...editForm, poAmount: Number(e.target.value)})} /></td>
-                          <td className="px-4 py-2"><input type="number" className="w-full px-2 py-1 border rounded text-sm" value={editForm.needToPayAmount || 0} onChange={e => setEditForm({...editForm, needToPayAmount: Number(e.target.value)})} /></td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                              ${req.status === 'Rejected' ? 'bg-red-100 text-red-800' : 
-                                'bg-blue-100 text-blue-800'}`}>
-                              {req.status}
-                            </span>
+                          <td className="px-8 py-4" colSpan={3}>
+                             <div className="grid grid-cols-3 gap-4">
+                                <input type="text" className="input-field py-1.5 text-xs font-bold" value={editForm.projectName || ''} onChange={e => setEditForm({...editForm, projectName: e.target.value})} />
+                                <input type="text" className="input-field py-1.5 text-xs font-bold" value={editForm.vendorName || ''} onChange={e => setEditForm({...editForm, vendorName: e.target.value})} />
+                                <input type="number" className="input-field py-1.5 text-xs font-black" value={editForm.needToPayAmount || 0} onChange={e => setEditForm({...editForm, needToPayAmount: Number(e.target.value)})} />
+                             </div>
                           </td>
-                          <td className="px-4 py-2 text-center whitespace-nowrap">
-                            <button onClick={handleSaveEdit} className="text-green-600 hover:text-green-900 mr-3"><Check className="h-4 w-4 inline" /></button>
-                            <button onClick={handleCancelEdit} className="text-red-600 hover:text-red-900"><X className="h-4 w-4 inline" /></button>
+                          <td className="px-10 py-4 whitespace-nowrap text-right" colSpan={2}>
+                            <button onClick={handleSaveEdit} className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg mr-2"><Check className="h-5 w-5" /></button>
+                            <button onClick={handleCancelEdit} className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg"><X className="h-5 w-5" /></button>
                           </td>
                         </>
                       ) : (
                         <>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.projectName}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.vendorName}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.poNumber}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(req.poAmount)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">{formatCurrency(req.needToPayAmount)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                              ${req.status === 'Rejected' ? 'bg-red-100 text-red-800' : 
-                                'bg-blue-100 text-blue-800'}`}>
+                          <td className="px-10 py-6">
+                            <div className="text-sm font-bold text-slate-900 leading-none">{req.projectName}</div>
+                            <div className="text-[11px] font-medium text-slate-500 mt-1">{req.vendorName}</div>
+                          </td>
+                          <td className="px-10 py-6">
+                            <div className="text-[11px] font-black text-slate-800 uppercase tracking-tighter">{req.poNumber}</div>
+                            <div className="text-[10px] font-bold text-slate-400 mt-0.5">{req.paymentType} Protocol</div>
+                          </td>
+                          <td className="px-10 py-6">
+                            <div className="text-[11px] font-medium text-slate-400 italic">PO Sum: {formatCurrency(req.poAmount)}</div>
+                            <div className="text-sm font-black text-rose-600 mt-1">{formatCurrency(req.needToPayAmount)}</div>
+                          </td>
+                          <td className="px-10 py-6 whitespace-nowrap">
+                            <span className={`status-badge border ${
+                              req.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-100' : 
+                                'bg-blue-50 text-blue-700 border-blue-100'}`}>
                               {req.status}
                             </span>
+                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 ml-1">Current Node: {req.currentStage}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                            <button onClick={() => handleEditClick(req)} className="text-blue-600 hover:text-blue-900">
-                              <Edit2 className="h-4 w-4 inline" />
+                          <td className="px-10 py-6 text-center">
+                            <button onClick={() => handleEditClick(req)} className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                              <Edit2 className="h-5 w-5" />
                             </button>
                           </td>
                         </>
@@ -472,3 +481,4 @@ export const PurchaseView: React.FC = () => {
     </div>
   );
 };
+

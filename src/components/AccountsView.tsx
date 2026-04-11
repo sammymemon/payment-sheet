@@ -4,7 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../store/AppContext';
 import { PaymentRequest } from '../types';
 import { formatCurrency } from '../lib/utils';
-import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { 
+  Calculator, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Clock, 
+  Activity, 
+  FileText,
+  ChevronRight
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../lib/utils';
 
 type RowEdit = {
   projectName: string;
@@ -27,7 +38,6 @@ export const AccountsView: React.FC = () => {
 
   const [edits, setEdits] = useState<Record<string, RowEdit>>({});
 
-  // Initialize edits for new pending requests
   useEffect(() => {
     const newEdits = { ...edits };
     let changed = false;
@@ -91,7 +101,7 @@ export const AccountsView: React.FC = () => {
     const finalRemark = edit.remarkSelection === 'Other' ? edit.customRemark : edit.remarkSelection;
     
     if (!finalRemark) {
-      alert("Please provide remarks for rejection.");
+      alert("Verification Failed: Remark selection required for rejection protocol.");
       return;
     }
     updateRequest(id, {
@@ -101,185 +111,199 @@ export const AccountsView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Accounts Department</h2>
-        <p className="text-sm text-gray-500 mt-1">Verify details, deduct TDS, and approve for compliance row by row.</p>
+    <div className="space-y-10 animate-in">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Accounts Verification</h2>
+          <p className="text-sm text-slate-500 font-medium mt-1">Secondary validation node for financial integrity check.</p>
+        </div>
+        <div className="mt-4 md:mt-0 flex items-center space-x-2 px-5 py-2.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100 shadow-sm">
+           <Calculator className="h-4.5 w-4.5" />
+           <span className="text-xs font-black uppercase tracking-widest">Awaiting Verification: {pendingRequests.length}</span>
+        </div>
       </div>
 
-      {/* Pending Requests Table */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Pending Verification</h3>
-        {pendingRequests.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-gray-200 text-center border-dashed">
-            <p className="text-gray-500">No pending requests for Accounts verification.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+      {/* Pending Ledger */}
+      <div className="glass-card overflow-hidden">
+        <div className="px-10 py-6 border-b border-slate-100 bg-white flex justify-between items-center">
+          <h3 className="text-xl font-black text-slate-900 tracking-tight">Clearing Table</h3>
+          <div className="px-3 py-1 bg-blue-50 text-[10px] font-bold text-blue-500 rounded-full uppercase tracking-widest">Real-time Verification Active</div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-100">
+            <thead className="bg-slate-900">
+              <tr>
+                <th colSpan={3} className="px-6 py-3 text-center text-[10px] font-bold text-white/50 uppercase tracking-widest border-r border-white/5">
+                  Origin Context
+                </th>
+                <th colSpan={4} className="px-6 py-3 text-center text-[10px] font-bold text-blue-400 uppercase tracking-widest border-r border-white/5 bg-blue-900/10">
+                  Verification protocol
+                </th>
+                <th className="px-6 py-3"></th>
+              </tr>
+              <tr>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest">Entity / Vendor</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest">PO Link</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-white uppercase tracking-widest border-r border-white/5">Need to Pay</th>
+                
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10">Bill Sum</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10">TDS Lock</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10 whitespace-nowrap">Payable (Post TDS)</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-900/10 border-r border-white/5">Remarks</th>
+                
+                <th className="px-8 py-4 text-center text-[10px] font-bold text-white uppercase tracking-widest whitespace-nowrap">Operations</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 bg-white">
+              {pendingRequests.length === 0 ? (
                 <tr>
-                  <th colSpan={5} className="px-3 py-2 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider border-b border-r border-gray-200 bg-gray-100">
-                    Purchase Data (Read-Only)
-                  </th>
-                  <th colSpan={5} className="px-3 py-2 text-center text-xs font-semibold text-blue-800 uppercase tracking-wider border-b border-gray-200 bg-blue-50">
-                    Accounts Verification (Editable)
-                  </th>
+                  <td colSpan={8} className="px-10 py-24 text-center">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
+                       <CheckCircle2 className="h-16 w-16 text-emerald-100 mb-6 drop-shadow-[0_0_15px_rgba(16,185,129,0.1)]" />
+                       <p className="text-sm font-black text-slate-300 uppercase tracking-[0.2em]">Verification Buffer Empty</p>
+                    </motion.div>
+                  </td>
                 </tr>
-                <tr>
-                  {/* Purchase Columns */}
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Project</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Vendor</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">PO No</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">PO Amt</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap border-r border-gray-200">Need to Pay</th>
-                  
-                  {/* Accounts Columns */}
-                  <th className="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider whitespace-nowrap bg-blue-50/50">Bill Amt</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider whitespace-nowrap bg-blue-50/50">TDS Amt</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider whitespace-nowrap bg-blue-50/50">Payable (Post TDS)</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider whitespace-nowrap bg-blue-50/50">Remarks</th>
-                  <th className="px-3 py-3 text-center text-xs font-medium text-blue-700 uppercase tracking-wider whitespace-nowrap bg-blue-50/50">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {pendingRequests.map(req => {
-                  const edit = edits[req.id] || { 
-                    projectName: req.projectName, vendorName: req.vendorName, poNumber: req.poNumber, poAmount: req.poAmount, needToPayAmount: req.needToPayAmount,
-                    billAmount: 0, remarkSelection: '', customRemark: '', tdsAmount: 0 
-                  };
+              ) : (
+                pendingRequests.map(req => {
+                  const edit = edits[req.id];
+                  if (!edit) return null;
                   const isMismatch = edit.poAmount !== edit.billAmount;
-                  const canApprove = true; // Allow approval even if bill amount is 0 or mismatch
                   const payableAfterTds = (edit.needToPayAmount || 0) - edit.tdsAmount;
                   
                   return (
-                    <tr key={req.id} className="hover:bg-gray-50 transition-colors group">
-                      {/* Purchase Data (Editable by Accounts) */}
-                      <td className="p-1 bg-blue-50/5 border-r border-gray-100">
-                        <input type="text" className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500" value={edit.projectName} onChange={e => updateEdit(req.id, 'projectName', e.target.value)} />
+                    <motion.tr 
+                      key={req.id} 
+                      layout
+                      className="hover:bg-slate-50/50 transition-colors group"
+                    >
+                      <td className="px-8 py-6">
+                        <input type="text" className="input-field py-1 text-xs font-bold w-full bg-white/50" value={edit.projectName} onChange={e => updateEdit(req.id, 'projectName', e.target.value)} />
+                        <input type="text" className="input-field py-1 text-[10px] font-medium w-full bg-white/50 mt-1" value={edit.vendorName} onChange={e => updateEdit(req.id, 'vendorName', e.target.value)} />
                       </td>
-                      <td className="p-1 bg-blue-50/5 border-r border-gray-100">
-                        <input type="text" className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500" value={edit.vendorName} onChange={e => updateEdit(req.id, 'vendorName', e.target.value)} />
+                      <td className="px-8 py-6">
+                        <input type="text" className="input-field py-1 text-xs font-black w-24 bg-white/50" value={edit.poNumber} onChange={e => updateEdit(req.id, 'poNumber', e.target.value)} />
+                        <div className="mt-2 flex items-center space-x-1">
+                           <span className="text-[10px] font-bold text-slate-400 uppercase">Input:</span>
+                           <input type="number" className="w-20 text-[10px] font-black outline-none bg-transparent" value={edit.poAmount} onChange={e => updateEdit(req.id, 'poAmount', Number(e.target.value))} />
+                        </div>
                       </td>
-                      <td className="p-1 bg-blue-50/5 border-r border-gray-100">
-                        <input type="text" className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500" value={edit.poNumber} onChange={e => updateEdit(req.id, 'poNumber', e.target.value)} />
-                      </td>
-                      <td className="p-1 bg-blue-50/5 border-r border-gray-100">
-                        <input type="number" className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500" value={edit.poAmount} onChange={e => updateEdit(req.id, 'poAmount', Number(e.target.value))} />
-                      </td>
-                      <td className="p-1 bg-blue-50/5 border-r border-gray-200">
-                        <input type="number" className="w-24 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 text-red-600 font-medium" value={edit.needToPayAmount} onChange={e => updateEdit(req.id, 'needToPayAmount', Number(e.target.value))} />
-                      </td>
-                      
-                      {/* Accounts Data */}
-                      <td className="p-0 bg-blue-50/10 border-r border-gray-100 relative">
-                        <input type="number" min="0" className={`w-24 px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm ${isMismatch ? 'text-red-600 font-bold' : ''}`}
-                          value={edit.billAmount || ''} onChange={e => updateEdit(req.id, 'billAmount', Number(e.target.value))} />
-                        {isMismatch && (
-                          <div className="absolute right-2 top-3 text-red-500" title="Mismatch with PO Amount">
-                            <AlertTriangle className="h-4 w-4" />
-                          </div>
-                        )}
+                      <td className="px-8 py-6 border-r border-slate-100 bg-slate-50/30">
+                        <input type="number" className="input-field py-2 text-sm font-black text-rose-600 bg-white w-24 shadow-inner" value={edit.needToPayAmount} onChange={e => updateEdit(req.id, 'needToPayAmount', Number(e.target.value))} />
                       </td>
                       
-                      {/* TDS and Payable */}
-                      <td className="p-0 bg-blue-50/10 border-r border-gray-100">
-                        <input type="number" min="0" placeholder="0" className="w-24 px-3 py-3 border-0 bg-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 text-sm text-red-600 font-medium"
+                      <td className="px-8 py-6 bg-blue-50/30 relative">
+                        <div className="relative">
+                          <input type="number" min="0" className={cn(
+                            "input-field py-3 text-sm font-black w-28 bg-white shadow-xl shadow-blue-500/5 transition-all focus:ring-4",
+                            isMismatch ? 'text-amber-600 border-amber-200 focus:ring-amber-100' : 'text-blue-700 border-blue-100 focus:ring-blue-100'
+                          )}
+                            value={edit.billAmount || ''} onChange={e => updateEdit(req.id, 'billAmount', Number(e.target.value))} />
+                          {isMismatch && (
+                            <div className="absolute -top-6 left-0 text-[10px] font-black text-amber-600 uppercase tracking-tighter flex items-center">
+                              <AlertTriangle className="h-3 w-3 mr-1" /> PO Mismatch
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      
+                      <td className="px-8 py-6 bg-blue-50/30">
+                        <input type="number" min="0" placeholder="0" className="input-field py-3 text-sm font-black text-rose-500 bg-white w-24 border-rose-100 focus:ring-rose-100"
                           value={edit.tdsAmount || ''} onChange={e => updateEdit(req.id, 'tdsAmount', Number(e.target.value))} />
                       </td>
-                      <td className="px-3 py-3 text-sm font-bold text-green-700 whitespace-nowrap bg-blue-50/10 border-r border-gray-100">
-                        {formatCurrency(payableAfterTds)}
+                      
+                      <td className="px-8 py-6 bg-blue-50/30">
+                        <div className="text-lg font-black text-emerald-600 tracking-tighter">{formatCurrency(payableAfterTds)}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 whitespace-nowrap">Net Disbursement</div>
                       </td>
 
-                      {/* Remarks */}
-                      <td className="p-2 bg-blue-50/10 border-r border-gray-100 min-w-[200px]">
-                        <div className="flex flex-col space-y-1">
+                      <td className="px-8 py-6 bg-blue-50/30 border-r border-slate-100 min-w-[200px]">
+                        <div className="space-y-2">
                           <select 
-                            className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm bg-white focus:ring-2 focus:ring-blue-500"
+                            className="input-field py-2 text-xs font-bold bg-white"
                             value={edit.remarkSelection}
                             onChange={e => updateEdit(req.id, 'remarkSelection', e.target.value)}
                           >
-                            <option value="">-- Select Remark --</option>
+                            <option value="">-- Choose Protocol --</option>
                             <option value="PO not approved">PO not approved</option>
                             <option value="Bill qty mismatch">Bill qty mismatch</option>
-                            <option value="Neither PI received nor bill received">Neither PI received nor bill received</option>
                             <option value="PI received">PI received</option>
-                            <option value="Other">Other (Type below)...</option>
+                            <option value="Other">Custom Manual Remark</option>
                           </select>
                           {edit.remarkSelection === 'Other' && (
-                            <input type="text" placeholder="Custom remark..." className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500"
+                            <input type="text" placeholder="Specify..." className="input-field py-2 text-xs font-medium bg-white animate-in"
                               value={edit.customRemark} onChange={e => updateEdit(req.id, 'customRemark', e.target.value)} />
                           )}
                         </div>
                       </td>
                       
-                      {/* Actions */}
-                      <td className="p-2 text-center align-middle bg-blue-50/10 whitespace-nowrap">
-                        <div className="flex items-center justify-center space-x-2">
-                          <button onClick={() => handleApprove(req.id)} disabled={!canApprove} title="Approve"
-                            className="p-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            <CheckCircle className="h-5 w-5" />
+                      <td className="px-8 py-6 bg-slate-50/50">
+                        <div className="flex flex-col space-y-2 max-w-[120px] mx-auto">
+                          <button onClick={() => handleApprove(req.id)}
+                            className="px-4 py-2.5 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center">
+                            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Approve
                           </button>
-                          <button onClick={() => handleReject(req.id)} title="Reject (Requires Remarks)"
-                            className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
-                            <XCircle className="h-5 w-5" />
+                          <button onClick={() => handleReject(req.id)}
+                            className="px-4 py-2.5 bg-white border border-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-rose-50 transition-all flex items-center justify-center">
+                            <XCircle className="h-3.5 w-3.5 mr-1.5" /> Void
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-        )}
       </div>
 
-      {/* Processed Requests Table */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Processed by Accounts</h3>
-        {processedRequests.length === 0 ? (
-          <div className="bg-white p-8 rounded-xl border border-gray-200 text-center border-dashed">
-            <p className="text-gray-500">No processed requests yet.</p>
-          </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bill Amt</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TDS</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payable</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+      {/* Processed History Ledger */}
+      <div className="glass-card overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+        <div className="px-10 py-6 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+          <h3 className="text-lg font-black text-slate-600 tracking-tight uppercase tracking-[0.1em]">Verification Archives</h3>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Audited: {processedRequests.length}</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-100">
+            <thead className="bg-slate-50/80">
+              <tr>
+                <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Context</th>
+                <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Audit Numbers</th>
+                <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Post-TDS Net</th>
+                <th className="px-10 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pipeline Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50 bg-white">
+              {processedRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-10 py-12 text-center text-xs font-bold text-slate-300 uppercase tracking-widest">Archive Empty</td>
+                </tr>
+              ) : (
+                processedRequests.map(req => (
+                  <tr key={req.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-10 py-5">
+                      <div className="text-sm font-bold text-slate-700 leading-tight">{req.projectName}</div>
+                      <div className="text-[10px] font-medium text-slate-500 mt-1">{req.vendorName}</div>
+                    </td>
+                    <td className="px-10 py-5">
+                      <div className="text-[11px] font-medium text-slate-500 italic">Bill Ledger: {formatCurrency(req.billAmount || 0)}</div>
+                      <div className="text-[11px] font-bold text-rose-500 mt-0.5">TDS Deduct: -{formatCurrency(req.tdsAmount || 0)}</div>
+                    </td>
+                    <td className="px-10 py-5">
+                      <div className="text-sm font-black text-slate-900 tracking-tight">{formatCurrency(req.payableAfterTds || 0)}</div>
+                    </td>
+                    <td className="px-10 py-5">
+                      <span className="status-badge bg-blue-50 text-blue-700 border border-blue-100">{req.status}</span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {processedRequests.map(req => (
-                    <tr key={req.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.projectName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.vendorName}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.poNumber}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(req.billAmount || 0)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">-{formatCurrency(req.tdsAmount || 0)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(req.payableAfterTds || 0)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          {req.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
