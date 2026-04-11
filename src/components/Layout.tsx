@@ -48,7 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             animate={{ width: 260, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white border-r border-slate-200 flex flex-col z-20 shrink-0 h-full overflow-hidden"
+            className="bg-white border-r border-slate-200 flex flex-col z-30 shrink-0 h-full overflow-hidden absolute md:relative shadow-xl md:shadow-none"
           >
             <div className="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
               <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center mr-3">
@@ -145,8 +145,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <div className="flex-1 overflow-auto p-4 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
