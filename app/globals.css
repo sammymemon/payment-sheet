@@ -3,10 +3,18 @@
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   
-  --color-primary: #0f172a; /* Slate 900 for a more corporate primary */
-  --color-primary-hover: #1e293b;
-  --color-secondary: #3b82f6; 
-  --color-secondary-hover: #2563eb;
+  /* Claude-inspired color palette */
+  --color-anthropic-bg: #F8F7F4;
+  --color-anthropic-surface: #FFFFFF;
+  --color-anthropic-border: #E8E7E2;
+  --color-anthropic-text: #2A2A26;
+  --color-anthropic-text-muted: #6B6A65;
+  
+  --color-anthropic-accent: #D9795A;
+  --color-anthropic-accent-hover: #C5684A;
+  
+  --color-anthropic-hover: #EBEAE5;
+  --color-anthropic-active: #E1E0DA;
   
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
@@ -14,54 +22,88 @@
 
 @layer base {
   body {
-    @apply bg-[#f8fafc] text-slate-900 antialiased;
+    background-color: var(--color-anthropic-bg);
+    color: var(--color-anthropic-text);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white border border-slate-200 shadow-sm rounded-xl;
+    background-color: var(--color-anthropic-surface);
+    border: 1px solid var(--color-anthropic-border);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
   
   .glass-card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:border-slate-300;
+    transition: all 0.2s ease;
+  }
+  .glass-card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-color: #D6D5D0;
   }
   
   .sidebar-item {
-    @apply flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200;
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 mt-1;
+    color: var(--color-anthropic-text-muted);
   }
   
   .sidebar-item-active {
-    @apply bg-slate-100 text-slate-900;
+    background-color: var(--color-anthropic-hover);
+    color: var(--color-anthropic-text);
   }
   
   .sidebar-item-inactive {
-    @apply text-slate-600 hover:bg-slate-50 hover:text-slate-900;
+    &:hover {
+      background-color: rgba(235, 234, 229, 0.5);
+      color: var(--color-anthropic-text);
+    }
   }
 
   .status-badge {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-medium inline-flex items-center;
+    @apply px-2.5 py-0.5 rounded-md text-xs font-medium inline-flex items-center border;
   }
   
   .btn-primary {
-    @apply px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2;
+    background-color: var(--color-anthropic-accent);
+    color: #FFFFFF;
+    @apply px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm focus:outline-none;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-anthropic-accent-hover);
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-white text-slate-700 text-sm font-medium border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2;
+    @apply px-4 py-2 bg-white text-sm font-medium border rounded-lg transition-colors shadow-sm focus:outline-none;
+    color: var(--color-anthropic-text);
+    border-color: var(--color-anthropic-border);
+  }
+  .btn-secondary:hover {
+    background-color: var(--color-anthropic-hover);
   }
   
   .input-field {
-    @apply w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none shadow-sm;
+    @apply w-full px-3 py-2 bg-white border rounded-lg text-sm transition-all outline-none;
+    border-color: var(--color-anthropic-border);
+    color: var(--color-anthropic-text);
+  }
+  .input-field:focus {
+    border-color: #A3A29D;
+    box-shadow: 0 0 0 1px #A3A29D;
   }
 
   .table-header {
-    @apply px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200 whitespace-nowrap;
+    @apply px-5 py-3 text-left text-xs font-medium whitespace-nowrap;
+    color: var(--color-anthropic-text-muted);
+    border-bottom: 1px solid var(--color-anthropic-border);
+    background-color: rgba(250, 249, 245, 0.5);
   }
 
   .table-cell {
-    @apply px-4 py-4 whitespace-nowrap text-sm text-slate-700;
+    @apply px-5 py-4 whitespace-nowrap text-sm;
+    color: var(--color-anthropic-text);
   }
   
   /* ensure all table content doesn't squeeze on small screens */
@@ -74,7 +116,6 @@
     @apply min-w-[120px] whitespace-nowrap;
   }
   
-  /* specifically for smaller amounts/dates if needed */
   td input[type="number"] {
     @apply min-w-[80px];
   }
@@ -82,19 +123,22 @@
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  background-color: #D6D5D0;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #BDBBB5;
 }
 
-/* Simple fade-in */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

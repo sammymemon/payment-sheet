@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useApp, defaultUsers } from '../store/AppContext';
+import { useApp } from '../store/AppContext';
 import { cn } from '../lib/utils';
 import { 
   LayoutDashboard, 
@@ -11,7 +11,6 @@ import {
   CreditCard,
   UserCircle,
   BookOpen,
-  Settings,
   Users as UsersIcon,
   ShieldAlert,
   Bell,
@@ -30,34 +29,34 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, role: 'Dashboard' },
-    { name: 'Purchase Requests', icon: ShoppingCart, role: 'Purchase' },
-    { name: 'Accounts Audit', icon: Calculator, role: 'Accounts' },
-    { name: 'Compliance Review', icon: ShieldCheck, role: 'Compliance' },
-    { name: 'Payments Processing', icon: CreditCard, role: 'Payments' },
-    { name: 'Master Register', icon: BookOpen, role: 'Register' },
-    { name: 'User Access', icon: UsersIcon, role: 'Admin' },
+    { name: 'Purchase', icon: ShoppingCart, role: 'Purchase' },
+    { name: 'Accounts', icon: Calculator, role: 'Accounts' },
+    { name: 'Compliance', icon: ShieldCheck, role: 'Compliance' },
+    { name: 'Payments', icon: CreditCard, role: 'Payments' },
+    { name: 'Register', icon: BookOpen, role: 'Register' },
+    { name: 'Admin', icon: UsersIcon, role: 'Admin' },
   ];
 
   return (
-    <div className="flex h-screen bg-[#f8fafc] overflow-hidden text-slate-900 font-sans">
+    <div className="flex h-screen overflow-hidden text-[#2A2A26] font-sans bg-[#F8F7F4]">
       {/* Sidebar */}
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <motion.aside 
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 260, opacity: 1 }}
+            animate={{ width: 250, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white border-r border-slate-200 flex flex-col z-30 shrink-0 h-full overflow-hidden absolute md:relative shadow-xl md:shadow-none"
+            className="flex flex-col z-30 shrink-0 h-full overflow-hidden absolute md:relative border-r border-[#E8E7E2] bg-[#F8F7F4]"
           >
-            <div className="h-16 flex items-center px-6 border-b border-slate-100 shrink-0">
-              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold text-sm tracking-tighter">DX</span>
+            <div className="h-16 flex items-center px-4 shrink-0">
+              <div className="w-8 h-8 rounded bg-[#D9795A] flex items-center justify-center mr-2 text-white font-serif italic font-bold">
+                C
               </div>
-              <h1 className="text-sm font-semibold text-slate-900 tracking-tight">FinOps Portal</h1>
+              <h1 className="text-base font-semibold tracking-tight text-[#2A2A26] font-serif">Claude Core</h1>
             </div>
             
-            <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+            <div className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
               {navItems.filter(item => {
                 if (currentUser.role === 'Admin') return true;
                 if (item.role === 'Dashboard') return true;
@@ -71,25 +70,25 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     className={cn(
                       "w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
                       isActive 
-                        ? "bg-slate-100 text-slate-900" 
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-[#EBEAE5] text-[#2A2A26]" 
+                        : "text-[#6B6A65] hover:bg-[#EBEAE5]/50 hover:text-[#2A2A26]"
                     )}
                   >
-                    <item.icon className={cn("mr-3 h-4 w-4", isActive ? "text-slate-900" : "text-slate-500")} />
+                    <item.icon className={cn("mr-2.5 h-4 w-4", isActive ? "text-[#2A2A26]" : "text-[#8D8C86]")} />
                     {item.name}
                   </button>
                 );
               })}
             </div>
 
-            <div className="p-4 border-t border-slate-100">
+            <div className="p-4 border-t border-[#E8E7E2]">
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                   <UserCircle className="h-5 w-5 text-slate-500" />
+                <div className="w-8 h-8 rounded bg-[#EBEAE5] flex items-center justify-center text-[#6B6A65]">
+                   <UserCircle className="h-5 w-5" />
                 </div>
                 <div className="ml-3 flex-1 overflow-hidden">
-                  <p className="text-sm font-medium text-slate-700 truncate">{currentUser.name}</p>
-                  <p className="text-xs text-slate-500">{currentUser.role}</p>
+                  <p className="text-sm font-medium text-[#2A2A26] truncate">{currentUser.name}</p>
+                  <p className="text-[11px] text-[#6B6A65] uppercase tracking-wider">{currentUser.role}</p>
                 </div>
                 {currentUser.role !== 'Admin' && (
                   <button 
@@ -100,7 +99,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                          setActiveTab('Dashboard');
                       }
                     }}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-all"
+                    className="p-1.5 text-[#8D8C86] hover:text-[#2A2A26] hover:bg-[#EBEAE5] rounded-md transition-all"
                     title="Switch to Admin"
                   >
                     <ShieldAlert className="h-4 w-4" />
@@ -113,16 +112,16 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 justify-between shrink-0 z-10 sticky top-0">
+      <main className="flex-1 flex flex-col min-w-0 bg-white md:rounded-l-[2rem] border-l border border-[#E8E7E2] shadow-sm my-2 mr-2">
+        <header className="h-16 flex items-center px-6 justify-between shrink-0 z-10 sticky top-0 border-b border-[#E8E7E2]/50">
           <div className="flex items-center space-x-4">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors"
+              className="p-1 text-[#6B6A65] hover:text-[#2A2A26] hover:bg-[#EAE9E4] rounded-md transition-colors"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h2 className="text-sm font-semibold text-slate-800">
+            <h2 className="text-sm font-medium text-[#2A2A26] font-serif tracking-wide">
               {navItems.find(i => i.role === activeTab)?.name || activeTab}
             </h2>
           </div>
@@ -130,30 +129,26 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center space-x-3">
              <div className="hidden md:flex relative max-w-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-slate-400" />
+                  <Search className="h-4 w-4 text-[#8D8C86]" />
                 </div>
                 <input 
                   type="text" 
-                  placeholder="Search..." 
-                  className="block w-64 pl-10 pr-3 py-1.5 border border-slate-300 rounded-md leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
+                  placeholder="Ask Claude..." 
+                  className="block w-64 pl-9 pr-3 py-1.5 border border-[#E8E7E2] rounded-md leading-5 bg-[#FAF9F5] text-[#2A2A26] placeholder-[#8D8C86] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#D9795A] focus:border-[#D9795A] sm:text-sm transition-all"
                 />
              </div>
-             <button className="p-1.5 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-1 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-auto p-4 md:p-8">
-          <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
+        <div className="flex-1 overflow-auto p-4 md:p-8 bg-[#FAFAFA] rounded-bl-[2rem]">
+          <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
               >
                 {children}
               </motion.div>

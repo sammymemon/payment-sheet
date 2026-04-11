@@ -23,8 +23,8 @@ export const DashboardView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Dashboard Overview</h2>
-          <p className="text-sm text-slate-500 mt-1">High-level view of operations and processing status.</p>
+          <h2 className="text-3xl font-serif text-[#2A2A26] tracking-tight">Dashboard Overview</h2>
+          <p className="text-sm text-[#6B6A65] mt-1">High-level view of operations and processing status.</p>
         </div>
         <div className="text-right hidden sm:block">
            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Last Sync</span>
@@ -56,8 +56,8 @@ export const DashboardView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <div className="glass-card overflow-hidden h-full flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-              <h3 className="text-base font-semibold text-slate-800">Recent Requests</h3>
+            <div className="px-6 py-4 border-b border-[#E8E7E2] bg-transparent flex justify-between items-center">
+              <h3 className="text-base font-semibold text-[#2A2A26]">Recent Requests</h3>
             </div>
             <div className="overflow-x-auto flex-1 bg-white">
               <table className="min-w-full divide-y divide-slate-200 border-b border-slate-200">
@@ -117,9 +117,9 @@ export const DashboardView: React.FC = () => {
 
         <div className="lg:col-span-1">
           <div className="glass-card overflow-hidden h-[600px] flex flex-col bg-slate-50">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
+            <div className="px-6 py-4 border-b border-[#E8E7E2] bg-transparent flex items-center justify-between">
               <div>
-                <h3 className="text-base font-semibold text-slate-800">Audit Trail</h3>
+                <h3 className="text-base font-semibold text-[#2A2A26]">Audit Trail</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Activity history</p>
               </div>
             </div>

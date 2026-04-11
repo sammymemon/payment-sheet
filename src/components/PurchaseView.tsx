@@ -149,8 +149,8 @@ export const PurchaseView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Purchase Requests</h2>
-          <p className="text-sm text-slate-500 mt-1">Create and manage unified purchase and payment requests.</p>
+          <h2 className="text-3xl font-serif text-[#2A2A26] tracking-tight">Purchase Requests</h2>
+          <p className="text-sm text-[#6B6A65] mt-1">Create and manage unified purchase and payment requests.</p>
         </div>
         <button
           onClick={() => setIsCreating(!isCreating)}
@@ -180,7 +180,7 @@ export const PurchaseView: React.FC = () => {
 
       {isCreating ? (
         <div className="glass-card p-8">
-          <h3 className="text-lg font-semibold text-slate-800 mb-6">Create New Payment Request</h3>
+          <h3 className="text-xl font-serif text-[#2A2A26] mb-6">Create New Payment Request</h3>
           
           {/* Smart Import Area */}
           <div 
@@ -280,8 +280,8 @@ export const PurchaseView: React.FC = () => {
         </div>
       ) : (
         <div className="glass-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 bg-white flex justify-between items-center">
-            <h3 className="text-base font-semibold text-slate-800">Recent Requests</h3>
+          <div className="px-6 py-4 border-b border-[#E8E7E2] bg-transparent flex justify-between items-center">
+            <h3 className="text-base font-semibold text-[#2A2A26]">Recent Requests</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-200">

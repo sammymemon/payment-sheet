@@ -59,8 +59,8 @@ export const AdminView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">User Management</h2>
-          <p className="text-sm text-slate-500 mt-1">Manage team access and role permissions.</p>
+          <h2 className="text-3xl font-serif text-[#2A2A26] tracking-tight">User Management</h2>
+          <p className="text-sm text-[#6B6A65] mt-1">Manage team access and role permissions.</p>
         </div>
         <div className="mt-4 md:mt-0">
           <button 
@@ -158,8 +158,8 @@ export const AdminView: React.FC = () => {
         {/* Directory */}
         <div className="lg:col-span-8">
           <div className="glass-card overflow-hidden h-full flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
-              <h3 className="text-base font-semibold text-slate-800">Active Team Directory</h3>
+            <div className="px-6 py-4 border-b border-[#E8E7E2] bg-transparent flex justify-between items-center">
+              <h3 className="text-base font-semibold text-[#2A2A26]">Active Team Directory</h3>
               <span className="text-xs font-medium text-slate-500">{users.length} Users</span>
             </div>
             <div className="overflow-x-auto">

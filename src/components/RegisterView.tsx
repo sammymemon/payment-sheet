@@ -39,8 +39,8 @@ export const RegisterView: React.FC = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Master Register</h2>
-          <p className="text-sm text-slate-500 mt-1">Global view of all processed and pending requests.</p>
+          <h2 className="text-3xl font-serif text-[#2A2A26] tracking-tight">Master Register</h2>
+          <p className="text-sm text-[#6B6A65] mt-1">Global view of all processed and pending requests.</p>
         </div>
         <div className="mt-4 md:mt-0 flex space-x-3">
            <div className="px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center space-x-2">
