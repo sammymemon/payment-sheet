@@ -265,9 +265,9 @@ export const PurchaseView: React.FC = () => {
                             <option value="Final">Final</option>
                           </select>
                         </td>
-                        <td className="p-2"><input required type="number" className="w-20 text-sm border-0 bg-transparent focus:ring-0 p-1" placeholder="0" value={row.poAmount || ''} onChange={e => updateRow(index, 'poAmount', Number(e.target.value))} /></td>
-                        <td className="p-2"><input required type="number" className="w-20 text-sm border-0 bg-transparent focus:ring-0 p-1" placeholder="0" value={row.alreadyPaidAmount || ''} onChange={e => updateRow(index, 'alreadyPaidAmount', Number(e.target.value))} /></td>
-                        <td className="p-2"><input required type="number" className="w-20 text-sm border-0 bg-transparent focus:ring-0 p-1 font-medium text-blue-600" placeholder="0" value={row.needToPayAmount || ''} onChange={e => updateRow(index, 'needToPayAmount', Number(e.target.value))} /></td>
+                        <td className="p-2"><input required type="number" className="text-sm border-0 bg-transparent focus:ring-0 p-1" placeholder="0" value={row.poAmount || ''} onChange={e => updateRow(index, 'poAmount', Number(e.target.value))} /></td>
+                        <td className="p-2"><input required type="number" className="text-sm border-0 bg-transparent focus:ring-0 p-1" placeholder="0" value={row.alreadyPaidAmount || ''} onChange={e => updateRow(index, 'alreadyPaidAmount', Number(e.target.value))} /></td>
+                        <td className="p-2"><input required type="number" className="text-sm border-0 bg-transparent focus:ring-0 p-1 font-medium text-blue-600" placeholder="0" value={row.needToPayAmount || ''} onChange={e => updateRow(index, 'needToPayAmount', Number(e.target.value))} /></td>
                         <td className="p-2 text-center align-middle"><input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" checked={row.needToPay} onChange={e => updateRow(index, 'needToPay', e.target.checked)} /></td>
                         <td className="p-2 text-center align-middle">
                           {rows.length > 1 && <button type="button" onClick={() => handleRemoveRow(index)} className="text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>}
@@ -312,7 +312,7 @@ export const PurchaseView: React.FC = () => {
                             <div className="flex gap-4">
                               <input type="text" className="input-field py-1" value={editForm.projectName || ''} onChange={e => setEditForm({...editForm, projectName: e.target.value})} />
                               <input type="text" className="input-field py-1" value={editForm.vendorName || ''} onChange={e => setEditForm({...editForm, vendorName: e.target.value})} />
-                              <input type="number" className="input-field py-1 w-32" value={editForm.needToPayAmount || 0} onChange={e => setEditForm({...editForm, needToPayAmount: Number(e.target.value)})} />
+                              <input type="number" className="input-field py-1" value={editForm.needToPayAmount || 0} onChange={e => setEditForm({...editForm, needToPayAmount: Number(e.target.value)})} />
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right" colSpan={2}>

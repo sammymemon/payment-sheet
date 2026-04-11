@@ -113,11 +113,13 @@
   }
 
   td input, td select {
-    @apply min-w-[120px] whitespace-nowrap;
+    field-sizing: content;
+    @apply min-w-[200px] whitespace-nowrap;
   }
   
   td input[type="number"] {
-    @apply min-w-[80px];
+    field-sizing: content;
+    @apply min-w-[120px];
   }
 }
 
